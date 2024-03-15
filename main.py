@@ -147,6 +147,7 @@ class TrainingArguments(transformers.Seq2SeqTrainingArguments):
     gradient_checkpointing: bool = field(default = True, metadata = {"help": 'Use gradient checkpointing. You want to use this.'})
     do_train: bool = field(default = True, metadata = {"help": 'To train or not to train, that is the question?'})
     do_eval: bool = field(default = True, metadata = {"help": 'To create a eval set or no, that is the question?'})
+    do_mmlu_eval: bool = field(default = False, metadata = {"help": 'To do evaluation on mmlu set or no, that is the question?'})
     lr_scheduler_type: str = field(default = 'constant', metadata = {"help": 'Learning rate schedule. Constant a bit better than cosine, and has advantage for analysis'})
     warmup_ratio: float = field(default = 0.03, metadata = {"help": 'Fraction of steps to do a warmup for'})
     logging_steps: int = field(default = 10, metadata = {"help": 'The frequency of update steps after which to log the loss'})
