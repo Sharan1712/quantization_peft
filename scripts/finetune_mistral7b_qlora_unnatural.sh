@@ -2,7 +2,7 @@ python main.py \
     --model_name_or_path mistralai/Mistral-7B-Instruct-v0.2 \
     --hf_token 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 \
     --use_auth \
-    --output_dir ./output/mistral-7b-unnatural-qlora-test \
+    --output_dir ./output/mistral-7b-unnatural-qlora-4bit \
     --logging_steps 10 \
     --save_strategy steps \
     --data_seed 2024 \
@@ -19,7 +19,6 @@ python main.py \
     --remove_unused_columns False \
     --do_train \
     --do_eval \
-    --do_mmlu_eval \
     --lora_r 64 \
     --lora_alpha 16 \
     --lora_modules all \
@@ -31,7 +30,7 @@ python main.py \
     --lr_scheduler_type constant \
     --gradient_checkpointing \
     --dataset unnatural-core \
-    --source_max_len 16 \
+    --source_max_len 100 \
     --target_max_len 512 \
     --per_device_train_batch_size 1 \
     --gradient_accumulation_steps 16 \

@@ -9,7 +9,6 @@ from typing import Optional, Dict, Sequence
 import numpy as np
 from tqdm import tqdm
 import logging
-import bitsandbytes as bnb
 import pandas as pd
 
 from common.utils import *
@@ -18,18 +17,13 @@ from common.data_utils import *
 
 import torch
 import transformers
-from torch.nn.utils.rnn import pad_sequence
 import argparse
 from transformers import (
-    AutoTokenizer, 
-    AutoModelForCausalLM,
     set_seed,
-    Seq2SeqTrainer,
-    BitsAndBytesConfig,
-    LlamaTokenizer
-
+    Seq2SeqTrainer
 )
-from datasets import load_dataset, Dataset
+from trl import SFTTrainer
+from datasets import load_dataset
 import evaluate
 
 from peft import (
@@ -38,7 +32,6 @@ from peft import (
     get_peft_model,
     PeftModel
 )
-from peft.tuners.lora import LoraLayer
 from transformers.trainer_utils import PREFIX_CHECKPOINT_DIR
 
 
@@ -91,7 +84,7 @@ class DataArguments:
         metadata = {"help": "Maximum target sequence length. Sequences will be right padded (and possibly truncated)."},
     )
     dataset: str = field(
-        default = 'unnatural-core',
+        default = 'alpaca',
         metadata = {"help": "Which dataset to finetune on. See datamodule for options."}
     )
     dataset_format: Optional[str] = field(
@@ -133,8 +126,10 @@ class TrainingArguments(transformers.Seq2SeqTrainingArguments):
     lora_r: int = field(default = 64, metadata = {"help": "Lora R dimension."})
     lora_alpha: float = field(default = 16, metadata = {"help": " Lora alpha."})
     lora_dropout: float = field(default = 0.0, metadata = {"help":"Lora dropout."})
+    dora: bool = field(default = False, metadata = {"help": 'Whether to include DoRA (Weight Decomposed Low Rank Adaptation)'})
     max_memory_MB: int = field(default = 49000, metadata = {"help": "Free memory per gpu."})
     report_to: str = field(default = 'none', metadata = {"help": "To use wandb or something else for reporting."})
+    sft: bool = field(default = True, metadata = {"help": "If True, use the SupervisedFineTuning Trainer of HF else use Seq2SeqTrainer"})
     output_dir: str = field(default = './output', metadata = {"help": 'The output dir for logs and checkpoints'})
     optim: str = field(default = 'paged_adamw_32bit', metadata = {"help": 'The optimizer to be used'})
     per_device_train_batch_size: int = field(default = 2, metadata = {"help": 'The training batch size per GPU. Increase for better speed.'})
@@ -186,6 +181,7 @@ class GenerationArguments:
     no_repeat_ngram_size: Optional[int] = field(default = 0)
 
 def train():
+    ## this part of the code is used to parse the arguments
     hfparser = transformers.HfArgumentParser((
         ModelArguments, DataArguments, TrainingArguments, GenerationArguments
     ))
@@ -197,11 +193,13 @@ def train():
     )
     print(args)
     
+
     checkpoint_dir, completed_training = get_last_checkpoint(args.output_dir)
     if completed_training:
         print('Detected that training was already completed!')
+        args.do_train = False
 
-    model, tokenizer = get_accelerate_model(args, checkpoint_dir)
+    model, tokenizer, peft_config = get_accelerate_model(args, checkpoint_dir)
 
     model.config.use_cache = False
     print('loaded model')
@@ -209,12 +207,22 @@ def train():
 
     data_module = make_data_module(tokenizer = tokenizer, args = args)
     
-    trainer = Seq2SeqTrainer(
-        model = model,
-        tokenizer = tokenizer,
-        args = training_args,
-        **{k:v for k,v in data_module.items() if k != 'predict_dataset'},
-    )
+    if not args.sft: 
+        trainer = Seq2SeqTrainer(
+            model = model,
+            tokenizer = tokenizer,
+            args = training_args,
+            **{k:v for k,v in data_module.items() if k != 'predict_dataset'},
+        )
+    else:
+        trainer = SFTTrainer(
+            model = model,
+            tokenizer = tokenizer,
+            **{k:v for k,v in data_module.items() if k != 'predict_dataset'},
+            peft_config = peft_config,
+            packing = True,
+            args = training_args
+            )
 
     # Callbacks
     if not args.full_finetune:
@@ -295,47 +303,47 @@ def train():
         print(k, v, v/total)
 
     all_metrics = {"run_name": args.run_name}
-    # # Training
-    # if args.do_train:
-    #     logger.info("*** Train ***")
-    #     # Note: `resume_from_checkpoint` not supported for adapter checkpoints by HF.
-    #     # Currently adapter checkpoint is reloaded as expected but optimizer/scheduler states are not.
-    #     train_result = trainer.train()
-    #     metrics = train_result.metrics
-    #     trainer.log_metrics("train", metrics)
-    #     trainer.save_metrics("train", metrics)
-    #     trainer.save_state()
-    #     all_metrics.update(metrics)
-    # # Evaluation
-    # if args.do_eval:
-    #     logger.info("*** Evaluate ***")
-    #     metrics = trainer.evaluate(metric_key_prefix="eval")
-    #     trainer.log_metrics("eval", metrics)
-    #     trainer.save_metrics("eval", metrics)
-    #     all_metrics.update(metrics)
-    # # Prediction
-    # if args.do_predict:
-    #     logger.info("*** Predict ***")
-    #     prediction_output = trainer.predict(test_dataset=data_module['predict_dataset'],metric_key_prefix="predict")
-    #     prediction_metrics = prediction_output.metrics
-    #     predictions = prediction_output.predictions
-    #     predictions = np.where(predictions != -100, predictions, tokenizer.pad_token_id)
-    #     predictions = tokenizer.batch_decode(
-    #         predictions, skip_special_tokens=True, clean_up_tokenization_spaces=True
-    #     )
-    #     with open(os.path.join(args.output_dir, 'predictions.jsonl'), 'w') as fout:
-    #         for i, example in enumerate(data_module['predict_dataset']):
-    #             example['prediction_with_input'] = predictions[i].strip()
-    #             example['prediction'] = predictions[i].replace(example['input'], '').strip()
-    #             fout.write(json.dumps(example) + '\n')
-    #     print(prediction_metrics)
-    #     trainer.log_metrics("predict", prediction_metrics)
-    #     trainer.save_metrics("predict", prediction_metrics)
-    #     all_metrics.update(prediction_metrics)
+    # Training
+    if args.do_train:
+        logger.info("*** Train ***")
+        # Note: `resume_from_checkpoint` not supported for adapter checkpoints by HF.
+        # Currently adapter checkpoint is reloaded as expected but optimizer/scheduler states are not.
+        train_result = trainer.train()
+        metrics = train_result.metrics
+        trainer.log_metrics("train", metrics)
+        trainer.save_metrics("train", metrics)
+        trainer.save_state()
+        all_metrics.update(metrics)
+    # Evaluation
+    if args.do_eval:
+        logger.info("*** Evaluate ***")
+        metrics = trainer.evaluate(metric_key_prefix = "eval")
+        trainer.log_metrics("eval", metrics)
+        trainer.save_metrics("eval", metrics)
+        all_metrics.update(metrics)
+    # Prediction
+    if args.do_predict:
+        logger.info("*** Predict ***")
+        prediction_output = trainer.predict(test_dataset = data_module['predict_dataset'], metric_key_prefix = "predict")
+        prediction_metrics = prediction_output.metrics
+        predictions = prediction_output.predictions
+        predictions = np.where(predictions != -100, predictions, tokenizer.pad_token_id)
+        predictions = tokenizer.batch_decode(
+            predictions, skip_special_tokens = True, clean_up_tokenization_spaces = True
+        )
+        with open(os.path.join(args.output_dir, 'predictions.jsonl'), 'w') as fout:
+            for i, example in enumerate(data_module['predict_dataset']):
+                example['prediction_with_input'] = predictions[i].strip()
+                example['prediction'] = predictions[i].replace(example['input'], '').strip()
+                fout.write(json.dumps(example) + '\n')
+        print(prediction_metrics)
+        trainer.log_metrics("predict", prediction_metrics)
+        trainer.save_metrics("predict", prediction_metrics)
+        all_metrics.update(prediction_metrics)
 
-    # if (args.do_train or args.do_eval or args.do_predict):
-    #     with open(os.path.join(args.output_dir, "metrics.json"), "w") as fout:
-    #         fout.write(json.dumps(all_metrics))
+    if (args.do_train or args.do_eval or args.do_predict):
+        with open(os.path.join(args.output_dir, "metrics.json"), "w") as fout:
+            fout.write(json.dumps(all_metrics))
 
 if __name__ == "__main__":
     train()
