@@ -173,15 +173,17 @@ def get_accelerate_model(args, checkpoint_dir):
         else:
             print(f'adding LoRA modules...')
             modules = find_all_linear_names(args, model)
-            config = LoraConfig(
+            peft_config = LoraConfig(
                 r = args.lora_r,
                 lora_alpha = args.lora_alpha,
                 target_modules = modules,
                 lora_dropout = args.lora_dropout,
                 bias = "none",
                 task_type = "CAUSAL_LM",
+                use_rslora = args.use_rslora,
+                use_dora = args.dora
             )
-            model = get_peft_model(model, config)
+            model = get_peft_model(model, peft_config)
 
     ## iterates through the named modules of the model to perform type casting to the appropriate data types
     for name, module in model.named_modules():
@@ -194,7 +196,7 @@ def get_accelerate_model(args, checkpoint_dir):
             if hasattr(module, 'weight'):
                 if args.bf16 and module.weight.dtype == torch.float32:
                     module = module.to(torch.bfloat16)
-    return model, tokenizer
+    return model, tokenizer, peft_config
 
 def print_trainable_parameters(args, model):
     """
@@ -239,6 +241,7 @@ def get_last_checkpoint(checkpoint_dir):
     if isdir(checkpoint_dir):
         is_completed = exists(join(checkpoint_dir, 'completed'))
         if is_completed: return None, True # already finished
+        print("Checkpoint Detected!")
         max_step = 0
         for filename in os.listdir(checkpoint_dir):
             if isdir(join(checkpoint_dir, filename)) and filename.startswith('checkpoint'):

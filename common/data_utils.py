@@ -246,8 +246,8 @@ def make_data_module(tokenizer: transformers.PreTrainedTokenizer, args) -> Dict:
         predict_with_generate = args.predict_with_generate,
     )
     return dict(
-        train_dataset=train_dataset if args.do_train else None,
-        eval_dataset=eval_dataset if args.do_eval else None,
-        predict_dataset=eval_dataset if args.do_predict else None,
-        data_collator=data_collator
+        train_dataset = train_dataset if args.do_train else None,
+        eval_dataset = eval_dataset if args.do_eval else None,
+        predict_dataset = eval_dataset if args.do_predict else None,
+        data_collator = data_collator
     )
