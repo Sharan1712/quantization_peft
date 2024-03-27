@@ -126,10 +126,11 @@ class TrainingArguments(transformers.Seq2SeqTrainingArguments):
     lora_r: int = field(default = 64, metadata = {"help": "Lora R dimension."})
     lora_alpha: float = field(default = 16, metadata = {"help": " Lora alpha."})
     lora_dropout: float = field(default = 0.0, metadata = {"help":"Lora dropout."})
+    use_rslora: bool = field(default = False, metadata = {"help": 'When set to True, uses Rank-Stabilized LoRA which sets the adapter scaling factor to lora_alpha/math.sqrt(r), since it was proven to work better.'})
     dora: bool = field(default = False, metadata = {"help": 'Whether to include DoRA (Weight Decomposed Low Rank Adaptation)'})
     max_memory_MB: int = field(default = 49000, metadata = {"help": "Free memory per gpu."})
     report_to: str = field(default = 'none', metadata = {"help": "To use wandb or something else for reporting."})
-    sft: bool = field(default = True, metadata = {"help": "If True, use the SupervisedFineTuning Trainer of HF else use Seq2SeqTrainer"})
+    sft: bool = field(default = False, metadata = {"help": "If True, use the SupervisedFineTuning Trainer of HF else use Seq2SeqTrainer"})
     output_dir: str = field(default = './output', metadata = {"help": 'The output dir for logs and checkpoints'})
     optim: str = field(default = 'paged_adamw_32bit', metadata = {"help": 'The optimizer to be used'})
     per_device_train_batch_size: int = field(default = 2, metadata = {"help": 'The training batch size per GPU. Increase for better speed.'})
@@ -202,12 +203,14 @@ def train():
     model, tokenizer, peft_config = get_accelerate_model(args, checkpoint_dir)
 
     model.config.use_cache = False
+    #model.enable_gradient_checkpointing(gradient_checkpointing_kwargs={"use_reentrant": False})
     print('loaded model')
     set_seed(args.seed)
 
     data_module = make_data_module(tokenizer = tokenizer, args = args)
     
     if not args.sft: 
+        print("Using Seq2SeqTrainer......")
         trainer = Seq2SeqTrainer(
             model = model,
             tokenizer = tokenizer,
@@ -215,14 +218,23 @@ def train():
             **{k:v for k,v in data_module.items() if k != 'predict_dataset'},
         )
     else:
+        print("Using SFTTrainer......") ## Not working yet. Need to fix errors
+        def format_instruction(sample):
+            return f"""
+            {sample['input']}
+
+            {sample['output']}
+            """
         trainer = SFTTrainer(
             model = model,
             tokenizer = tokenizer,
             **{k:v for k,v in data_module.items() if k != 'predict_dataset'},
             peft_config = peft_config,
+            max_seq_length = args.source_max_len,
             packing = True,
+            formatting_func = format_instruction,
             args = training_args
-            )
+        )
 
     # Callbacks
     if not args.full_finetune:
@@ -287,8 +299,10 @@ def train():
                 results[f'mmlu_{args.mmlu_split}_accuracy'] = np.mean(subject_scores)
                 trainer.log(results)
                 trainer.data_collator.source_max_len = source_max_len
+                self.mmlu_results = results 
 
-        trainer.add_callback(MMLUEvalCallback)
+        callback = MMLUEvalCallback()
+        trainer.add_callback(callback)
 
     # Verifying the datatypes and parameter counts before training.
     print_trainable_parameters(args, model)
@@ -321,6 +335,10 @@ def train():
         trainer.log_metrics("eval", metrics)
         trainer.save_metrics("eval", metrics)
         all_metrics.update(metrics)
+    if args.do_mmlu_eval:
+        print("MMLU Results.......")
+        print(callback.mmlu_results)
+        all_metrics.update(callback.mmlu_results)
     # Prediction
     if args.do_predict:
         logger.info("*** Predict ***")

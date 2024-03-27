@@ -180,6 +180,7 @@ def get_accelerate_model(args, checkpoint_dir):
                 lora_dropout = args.lora_dropout,
                 bias = "none",
                 task_type = "CAUSAL_LM",
+                use_rslora = args.use_rslora,
                 use_dora = args.dora
             )
             model = get_peft_model(model, peft_config)

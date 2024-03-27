@@ -3,10 +3,10 @@ python main.py \
     --hf_token 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 \
     --use_auth \
     --output_dir ./output/llama2-7b-alpaca-qlora-4bit \
-    --logging_steps 10 \
+    --logging_steps 25 \
     --save_strategy steps \
     --data_seed 2024 \
-    --save_steps 500 \
+    --save_steps 1000 \
     --save_total_limit 40 \
     --evaluation_strategy steps \
     --eval_dataset_size 1024 \
@@ -33,13 +33,13 @@ python main.py \
     --dataset_format alpaca \
     --source_max_len 384 \
     --target_max_len 128 \
-    --per_device_train_batch_size 4 \
+    --per_device_train_batch_size 6 \
     --gradient_accumulation_steps 16 \
-    --max_steps 2000 \
-    --eval_steps 200 \
+    --max_steps 10000 \
+    --eval_steps 1000 \
     --learning_rate 0.0002 \
     --adam_beta2 0.999 \
     --max_grad_norm 0.3 \
     --lora_dropout 0.1 \
     --weight_decay 0.0 \
-    --seed 0 \
+    --seed 2024 \
