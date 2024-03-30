@@ -170,3 +170,4 @@ data/training/*
 common/__pycache__/data_utils.cpython-312.pyc
 common/__pycache__/model_utils.cpython-312.pyc
 common/__pycache__/utils.cpython-312.pyc
+scripts/.nfs*

@@ -78,7 +78,7 @@ class SavePeftModelCallback(transformers.TrainerCallback):
 def get_accelerate_model(args, checkpoint_dir):
 
     if torch.cuda.is_available():
-        n_gpus = 2
+        n_gpus = args.n_gpus ##no. of gpus to use for training
     if is_ipex_available() and torch.xpu.is_available():
         n_gpus = torch.xpu.device_count()
     

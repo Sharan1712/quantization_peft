@@ -94,6 +94,7 @@ class DataArguments:
 
 @dataclass
 class TrainingArguments(transformers.Seq2SeqTrainingArguments):
+    n_gpus: int = field(default = 2, metadata = {"help": "Number of GPUs to use while training."})
     cache_dir: Optional[str] = field(default = None)
     train_on_source: Optional[bool] = field(
         default = False,
