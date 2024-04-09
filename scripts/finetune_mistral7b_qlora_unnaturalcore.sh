@@ -1,8 +1,8 @@
 python main.py \
-    --model_name_or_path meta-llama/Llama-2-7b-hf \
+    --model_name_or_path mistralai/Mistral-7B-Instruct-v0.2 \
     --hf_token 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 \
     --use_auth \
-    --output_dir ./output/llama2-7b-unnatural-core-qlora-4bit \
+    --output_dir ./output/mistral-7b-unnatural-core-qlora-4bit \
     --logging_steps 25 \
     --save_strategy steps \
     --data_seed 2024 \

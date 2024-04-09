@@ -1,8 +1,8 @@
 python main.py \
-    --model_name_or_path meta-llama/Llama-2-7b-hf \
+    --model_name_or_path mistralai/Mistral-7B-Instruct-v0.2 \
     --hf_token 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 \
     --use_auth \
-    --output_dir ./output/llama2-7b-unnatural-core-qlora-4bit \
+    --output_dir ./output/mistral-7b-self-instruct-qlora-4bit \
     --logging_steps 25 \
     --save_strategy steps \
     --data_seed 2024 \
@@ -18,7 +18,6 @@ python main.py \
     --remove_unused_columns False \
     --do_train \
     --do_eval \
-    --do_predict \
     --do_mmlu_eval \
     --lora_r 64 \
     --lora_alpha 16 \
@@ -30,8 +29,8 @@ python main.py \
     --warmup_ratio 0.03 \
     --lr_scheduler_type constant \
     --gradient_checkpointing \
-    --dataset unnatural-core \
-    --dataset_format unnatural-core \
+    --dataset self-instruct \
+    --dataset_format self-instruct \
     --source_max_len 384 \
     --target_max_len 128 \
     --per_device_train_batch_size 4 \

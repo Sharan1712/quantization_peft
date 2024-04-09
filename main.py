@@ -26,12 +26,6 @@ from trl import SFTTrainer
 from datasets import load_dataset
 import evaluate
 
-from peft import (
-    prepare_model_for_kbit_training,
-    LoraConfig,
-    get_peft_model,
-    PeftModel
-)
 from transformers.trainer_utils import PREFIX_CHECKPOINT_DIR
 
 
@@ -128,7 +122,8 @@ class TrainingArguments(transformers.Seq2SeqTrainingArguments):
     lora_alpha: float = field(default = 16, metadata = {"help": " Lora alpha."})
     lora_dropout: float = field(default = 0.0, metadata = {"help":"Lora dropout."})
     use_rslora: bool = field(default = False, metadata = {"help": 'When set to True, uses Rank-Stabilized LoRA which sets the adapter scaling factor to lora_alpha/math.sqrt(r), since it was proven to work better.'})
-    dora: bool = field(default = False, metadata = {"help": 'Whether to include DoRA (Weight Decomposed Low Rank Adaptation)'})
+    use_dora: bool = field(default = False, metadata = {"help": 'Whether to include DoRA (Weight Decomposed Low Rank Adaptation)'})
+    use_loftq: bool = field(default = False, metadata = {"help": 'Whether to initialize the LoRA Adapter weights using LoftQ initialization.'})
     max_memory_MB: int = field(default = 49000, metadata = {"help": "Free memory per gpu."})
     report_to: str = field(default = 'none', metadata = {"help": "To use wandb or something else for reporting."})
     sft: bool = field(default = False, metadata = {"help": "If True, use the SupervisedFineTuning Trainer of HF else use Seq2SeqTrainer"})
