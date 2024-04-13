@@ -25,6 +25,7 @@ from transformers import (
 from trl import SFTTrainer
 from datasets import load_dataset
 import evaluate
+import wandb
 
 from transformers.trainer_utils import PREFIX_CHECKPOINT_DIR
 
@@ -33,6 +34,10 @@ if torch.cuda.is_available():
     torch.backends.cuda.matmul.allow_tf32 = True
 
 logger = logging.getLogger(__name__)
+
+# set the wandb project where this run will be logged
+os.environ["WANDB_PROJECT"] = "Master Thesis Experiments"
+os.environ["WANDB_LOG_MODEL"] = "true"
 
 ## We set the ModelArguments
 @dataclass
@@ -88,6 +93,8 @@ class DataArguments:
 
 @dataclass
 class TrainingArguments(transformers.Seq2SeqTrainingArguments):
+    report_to: Optional[str] = field(default = "wandb", metadata = {"help":"Where to log losses"})
+    run_name: str = field(default = "experiment-1", metadata = {"help":"Name of the run to see on W&B"})
     n_gpus: int = field(default = 2, metadata = {"help": "Number of GPUs to use while training."})
     cache_dir: Optional[str] = field(default = None)
     train_on_source: Optional[bool] = field(
