@@ -2,7 +2,9 @@ python main.py \
     --model_name_or_path meta-llama/Llama-2-7b-hf \
     --hf_token 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 \
     --use_auth \
-    --output_dir ./output/llama2-7b-unnatural-core-qlora-4bit \
+    --output_dir ./output/qlora_exp/7B/llama2-7b-unnatural-core-qlora-4bit \
+    --report_to wandb \
+    --run_name llama2_7B_unnaturalcore_qlora_4bit \
     --logging_steps 25 \
     --save_strategy steps \
     --data_seed 2024 \

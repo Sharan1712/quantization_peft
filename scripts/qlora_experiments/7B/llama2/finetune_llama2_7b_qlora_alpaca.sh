@@ -2,7 +2,9 @@ python main.py \
     --model_name_or_path meta-llama/Llama-2-7b-hf \
     --hf_token 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 \
     --use_auth \
-    --output_dir ./output/llama2-7b-self-instruct-qlora-4bit \
+    --output_dir ./output/qlora_exp/7B/llama2-7b-alpaca-qlora-4bit \
+    --report_to wandb \
+    --run_name llama2_7B_alpaca_qlora_4bit \
     --logging_steps 25 \
     --save_strategy steps \
     --data_seed 2024 \
@@ -29,11 +31,11 @@ python main.py \
     --warmup_ratio 0.03 \
     --lr_scheduler_type constant \
     --gradient_checkpointing \
-    --dataset self-instruct \
-    --dataset_format self-instruct \
+    --dataset alpaca \
+    --dataset_format alpaca \
     --source_max_len 384 \
     --target_max_len 128 \
-    --per_device_train_batch_size 4 \
+    --per_device_train_batch_size 6 \
     --gradient_accumulation_steps 16 \
     --max_steps 10000 \
     --eval_steps 1000 \

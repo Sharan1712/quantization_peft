@@ -3,6 +3,7 @@ python main.py \
     --hf_token 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 \
     --use_auth \
     --output_dir ./output/qslora_exp/7B/llama2-7b-alpaca-qrslora-4bit-lowrank \
+    --report_to wandb \
     --run_name llama2_7B_alpaca_qrslora_4bit_lowrank \
     --logging_steps 25 \
     --save_strategy steps \

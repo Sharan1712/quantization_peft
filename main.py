@@ -93,7 +93,7 @@ class DataArguments:
 
 @dataclass
 class TrainingArguments(transformers.Seq2SeqTrainingArguments):
-    report_to: Optional[str] = field(default = "wandb", metadata = {"help":"Where to log losses"})
+    report_to: str = field(default = "wandb", metadata = {"help":"Where to log losses"})
     run_name: str = field(default = "experiment-1", metadata = {"help":"Name of the run to see on W&B"})
     n_gpus: int = field(default = 2, metadata = {"help": "Number of GPUs to use while training."})
     cache_dir: Optional[str] = field(default = None)
