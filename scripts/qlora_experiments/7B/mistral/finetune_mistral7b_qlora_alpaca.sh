@@ -2,7 +2,9 @@ python main.py \
     --model_name_or_path mistralai/Mistral-7B-Instruct-v0.2 \
     --hf_token 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 \
     --use_auth \
-    --output_dir ./output/mistral-7b-alpaca-qlora-4bit \
+    --output_dir ./output/qlora_exp/7B/mistral-7b-alpaca-qlora-4bit \
+    --report_to wandb \
+    --run_name mistral_7B_alpaca_qlora_4bit \
     --logging_steps 10 \
     --save_strategy steps \
     --data_seed 2024 \

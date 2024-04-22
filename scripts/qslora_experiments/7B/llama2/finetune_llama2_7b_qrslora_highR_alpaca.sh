@@ -2,7 +2,9 @@ python main.py \
     --model_name_or_path meta-llama/Llama-2-7b-hf \
     --hf_token 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 \
     --use_auth \
-    --output_dir ./output/llama2-7b-alpaca-qrslora-4bit \
+    --output_dir ./output/qslora_exp/7B/llama2-7b-alpaca-qrslora-4bit-highrank \
+    --report_to wandb \
+    --run_name llama2_7B_alpaca_qrslora_4bit_highrank \
     --logging_steps 25 \
     --save_strategy steps \
     --data_seed 2024 \
@@ -19,8 +21,8 @@ python main.py \
     --do_train \
     --do_eval \
     --do_mmlu_eval \
-    --lora_r 64 \
-    --lora_alpha 16 \
+    --lora_r 256 \
+    --lora_alpha 128 \
     --lora_modules all \
     --use_rslora True \
     --double_quant \

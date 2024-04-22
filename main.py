@@ -25,13 +25,8 @@ from transformers import (
 from trl import SFTTrainer
 from datasets import load_dataset
 import evaluate
+import wandb
 
-from peft import (
-    prepare_model_for_kbit_training,
-    LoraConfig,
-    get_peft_model,
-    PeftModel
-)
 from transformers.trainer_utils import PREFIX_CHECKPOINT_DIR
 
 
@@ -39,6 +34,10 @@ if torch.cuda.is_available():
     torch.backends.cuda.matmul.allow_tf32 = True
 
 logger = logging.getLogger(__name__)
+
+# set the wandb project where this run will be logged
+os.environ["WANDB_PROJECT"] = "Master Thesis Experiments"
+os.environ["WANDB_LOG_MODEL"] = "true"
 
 ## We set the ModelArguments
 @dataclass
@@ -94,6 +93,9 @@ class DataArguments:
 
 @dataclass
 class TrainingArguments(transformers.Seq2SeqTrainingArguments):
+    report_to: str = field(default = "wandb", metadata = {"help":"Where to log losses"})
+    run_name: str = field(default = "experiment-1", metadata = {"help":"Name of the run to see on W&B"})
+    n_gpus: int = field(default = 2, metadata = {"help": "Number of GPUs to use while training."})
     cache_dir: Optional[str] = field(default = None)
     train_on_source: Optional[bool] = field(
         default = False,
@@ -127,7 +129,8 @@ class TrainingArguments(transformers.Seq2SeqTrainingArguments):
     lora_alpha: float = field(default = 16, metadata = {"help": " Lora alpha."})
     lora_dropout: float = field(default = 0.0, metadata = {"help":"Lora dropout."})
     use_rslora: bool = field(default = False, metadata = {"help": 'When set to True, uses Rank-Stabilized LoRA which sets the adapter scaling factor to lora_alpha/math.sqrt(r), since it was proven to work better.'})
-    dora: bool = field(default = False, metadata = {"help": 'Whether to include DoRA (Weight Decomposed Low Rank Adaptation)'})
+    use_dora: bool = field(default = False, metadata = {"help": 'Whether to include DoRA (Weight Decomposed Low Rank Adaptation)'})
+    use_loftq: bool = field(default = False, metadata = {"help": 'Whether to initialize the LoRA Adapter weights using LoftQ initialization.'})
     max_memory_MB: int = field(default = 49000, metadata = {"help": "Free memory per gpu."})
     report_to: str = field(default = 'none', metadata = {"help": "To use wandb or something else for reporting."})
     sft: bool = field(default = False, metadata = {"help": "If True, use the SupervisedFineTuning Trainer of HF else use Seq2SeqTrainer"})

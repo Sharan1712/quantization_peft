@@ -19,7 +19,8 @@ from peft import (
     prepare_model_for_kbit_training,
     LoraConfig,
     get_peft_model,
-    PeftModel
+    PeftModel,
+    replace_lora_weights_loftq
 )
 from peft.tuners.lora import LoraLayer
 
@@ -78,7 +79,7 @@ class SavePeftModelCallback(transformers.TrainerCallback):
 def get_accelerate_model(args, checkpoint_dir):
 
     if torch.cuda.is_available():
-        n_gpus = 2
+        n_gpus = args.n_gpus ##no. of gpus to use for training
     if is_ipex_available() and torch.xpu.is_available():
         n_gpus = torch.xpu.device_count()
     
@@ -98,21 +99,25 @@ def get_accelerate_model(args, checkpoint_dir):
 
     ## model is loaded from a pre-trained state, with parameters for quantization and other configurations determined by the arguments.
     print(f'loading base model {args.model_name_or_path}...')
+    
     compute_dtype = (torch.float16 if args.fp16 else (torch.bfloat16 if args.bf16 else torch.float32))
+
+    bnb_config = BitsAndBytesConfig(
+        load_in_4bit = args.bits == 4,
+        load_in_8bit = args.bits == 8,
+        llm_int8_threshold = 6.0,
+        llm_int8_has_fp16_weight = False,
+        bnb_4bit_compute_dtype = compute_dtype,
+        bnb_4bit_use_double_quant = args.double_quant,
+        bnb_4bit_quant_type = args.quant_type
+        )
+
     model = AutoModelForCausalLM.from_pretrained(
         args.model_name_or_path,
         cache_dir = args.cache_dir,
         device_map = device_map,
         max_memory = max_memory,
-        quantization_config = BitsAndBytesConfig(
-            load_in_4bit = args.bits == 4,
-            load_in_8bit = args.bits == 8,
-            llm_int8_threshold = 6.0,
-            llm_int8_has_fp16_weight = False,
-            bnb_4bit_compute_dtype = compute_dtype,
-            bnb_4bit_use_double_quant = args.double_quant,
-            bnb_4bit_quant_type = args.quant_type,
-        ),
+        quantization_config = bnb_config,
         torch_dtype = (torch.float16 if args.fp16 else (torch.bfloat16 if args.bf16 else torch.float32)),
         trust_remote_code = args.trust_remote_code,
         token = args.hf_token
@@ -181,9 +186,12 @@ def get_accelerate_model(args, checkpoint_dir):
                 bias = "none",
                 task_type = "CAUSAL_LM",
                 use_rslora = args.use_rslora,
-                use_dora = args.dora
+                use_dora = args.use_dora
             )
             model = get_peft_model(model, peft_config)
+            if args.use_loftq:
+                print(f'Using LoftQ Initialization.....')
+                replace_lora_weights_loftq(model)
 
     ## iterates through the named modules of the model to perform type casting to the appropriate data types
     for name, module in model.named_modules():
