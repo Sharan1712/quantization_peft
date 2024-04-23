@@ -227,6 +227,8 @@ def make_data_module(tokenizer: transformers.PreTrainedTokenizer, args) -> Dict:
                 test_size = args.eval_dataset_size, shuffle = True, seed = 2024
             )
             eval_dataset = dataset['test']
+            print(f"Samples in Train dataset = {len(dataset["train"])}")
+            print(f"Samples in Eval dataset = {len(eval_dataset)}")
         if args.max_eval_samples is not None and len(eval_dataset) > args.max_eval_samples:
             eval_dataset = eval_dataset.select(range(args.max_eval_samples))
         if args.group_by_length:

@@ -57,8 +57,8 @@ class ModelArguments:
 ## We set the DataArguments
 @dataclass
 class DataArguments:
-    eval_dataset_size: int = field(
-        default = 1024, metadata={"help": "Size of validation dataset."}
+    eval_dataset_size: float = field(
+        default = 0.3, metadata={"help": "Size of validation dataset."}
     )
     max_train_samples: Optional[int] = field(
         default = None,
