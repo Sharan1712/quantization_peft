@@ -93,6 +93,8 @@ class DataArguments:
 
 @dataclass
 class TrainingArguments(transformers.Seq2SeqTrainingArguments):
+    load_best_model_at_end: bool = field(default = True, metadata = {"help":"Whether or not to load the best model found during training at the end of training"} )
+    metric_for_best_model: str = field(default = "eval_loss", metadata = {"help":"specify the metric to use to compare two different models"})
     report_to: str = field(default = "wandb", metadata = {"help":"Where to log losses"})
     run_name: str = field(default = "experiment-1", metadata = {"help":"Name of the run to see on W&B"})
     n_gpus: int = field(default = 2, metadata = {"help": "Number of GPUs to use while training."})
