@@ -1,10 +1,10 @@
 python main.py \
-    --model_name_or_path meta-llama/Llama-2-7b-hf \
+    --model_name_or_path mistralai/Mistral-7B-Instruct-v0.2 \
     --hf_token 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 \
     --use_auth \
-    --output_dir ./output/qlora_exp/7B/llama2-7b-alpaca-qlora-4bit_diff \
+    --output_dir ./output/qlora_exp/7B/mistral-7b-alpaca-qlora-4bit_diff \
     --report_to wandb \
-    --run_name llama2_7B_alpaca_qlora_4bit_diff \
+    --run_name mistral_7B_alpaca_qlora_4bit_diff \
     --logging_steps 25 \
     --save_strategy steps \
     --data_seed 2024 \
