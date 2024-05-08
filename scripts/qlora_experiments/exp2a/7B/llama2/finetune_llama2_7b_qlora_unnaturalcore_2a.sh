@@ -2,10 +2,9 @@ python main.py \
     --model_name_or_path meta-llama/Llama-2-7b-hf \
     --hf_token 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 \
     --use_auth \
-    --upload_to_hub True \
-    --output_dir ./output/loftq_exp/7B/llama2-7b-unnatural-core-loftq-4bit \
+    --output_dir ./output/qlora_exp/exp2a/7B/llama2-7b-unnatural-core-qlora-4bit \
     --report_to wandb \
-    --run_name llama2_7B_unnaturalcore_loftq_4bit \
+    --run_name llama2_7B_unnaturalcore_qlora_4bit_2a \
     --logging_steps 25 \
     --save_strategy steps \
     --data_seed 2024 \
@@ -20,9 +19,9 @@ python main.py \
     --remove_unused_columns False \
     --do_train \
     --do_eval \
+    --do_predict \
     --do_mmlu_eval \
-    --use_loftq True \
-    --lora_r 64 \
+    --lora_r 8 \
     --lora_alpha 16 \
     --lora_modules all \
     --double_quant \
@@ -36,7 +35,7 @@ python main.py \
     --dataset_format unnatural-core \
     --source_max_len 384 \
     --target_max_len 128 \
-    --per_device_train_batch_size 8 \
+    --per_device_train_batch_size 4 \
     --gradient_accumulation_steps 16 \
     --max_steps 5000 \
     --eval_steps 500 \

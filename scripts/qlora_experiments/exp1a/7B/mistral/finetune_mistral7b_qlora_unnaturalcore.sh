@@ -1,11 +1,10 @@
 python main.py \
-    --model_name_or_path meta-llama/Llama-2-7b-hf \
+    --model_name_or_path mistralai/Mistral-7B-Instruct-v0.2 \
     --hf_token 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 \
     --use_auth \
-    --upload_to_hub True \
-    --output_dir ./output/loftq_exp/7B/llama2-7b-unnatural-core-loftq-4bit \
+    --output_dir ./output/qlora_exp/exp1a/7B/mistral-7b-unnatural-core-qlora-4bit \
     --report_to wandb \
-    --run_name llama2_7B_unnaturalcore_loftq_4bit \
+    --run_name mistral_7B_unnaturalcore_qlora_4bit_1a \
     --logging_steps 25 \
     --save_strategy steps \
     --data_seed 2024 \
@@ -20,8 +19,8 @@ python main.py \
     --remove_unused_columns False \
     --do_train \
     --do_eval \
+    --do_predict \
     --do_mmlu_eval \
-    --use_loftq True \
     --lora_r 64 \
     --lora_alpha 16 \
     --lora_modules all \
