@@ -2,9 +2,9 @@ python main.py \
     --model_name_or_path mistralai/Mistral-7B-Instruct-v0.2 \
     --hf_token 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 \
     --use_auth \
-    --output_dir ./output/qlora_exp/exp2a/7B/mistral-7b-self-instruct-qlora-4bit \
+    --output_dir ./output/qlora_exp/exp1b/7B/mistral-7b-self-instruct-qlora-4bit \
     --report_to wandb \
-    --run_name mistral_7B_selfinstruct_qlora_4bit_2a \
+    --run_name mistral_7B_selfinstruct_qlora_4bit_1b \
     --logging_steps 25 \
     --save_strategy steps \
     --data_seed 2024 \

@@ -1,10 +1,10 @@
 python main.py \
-    --model_name_or_path meta-llama/Llama-2-7b-hf \
+    --model_name_or_path mistralai/Mistral-7B-Instruct-v0.2 \
     --hf_token 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 \
     --use_auth \
-    --output_dir ./output/qlora_exp/exp2a/7B/llama2-7b-alpaca-qlora-4bit \
+    --output_dir ./output/qlora_exp/exp1b/7B/mistral-7b-alpaca-qlora-4bit \
     --report_to wandb \
-    --run_name llama2_7B_alpaca_qlora_4bit_2a \
+    --run_name mistral_7B_alpaca_qlora_4bit_1b \
     --logging_steps 25 \
     --save_strategy steps \
     --data_seed 2024 \
@@ -13,8 +13,8 @@ python main.py \
     --evaluation_strategy steps \
     --eval_dataset_size 0.3 \
     --per_device_eval_batch_size 6 \
-    --group_by_length \
     --dataloader_num_workers 1 \
+    --group_by_length \
     --logging_strategy steps \
     --remove_unused_columns False \
     --do_train \
