@@ -11,7 +11,7 @@ python main.py \
     --save_steps 500 \
     --save_total_limit 40 \
     --evaluation_strategy steps \
-    --eval_dataset_size 0.3 \
+    --eval_dataset_size 0.2 \
     --per_device_eval_batch_size 6 \
     --dataloader_num_workers 1 \
     --group_by_length \

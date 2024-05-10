@@ -367,62 +367,66 @@ def train():
 
     if args.upload_to_hub:
         print("Uploading tuned model to HF..........")
+
         new_model = args.run_name
-        trainer.model.save_pretrained(new_model)
+        trainer.model.push_to_hub(f"Sharan1712/{new_model}")
+        tokenizer.push_to_hub(f"Sharan1712/{new_model}")
 
-        ## sets the maximum memory that can be used per device and automatically determines a device mapping for model parts
-        max_memory = f'{args.max_memory_MB}MB'
-        max_memory = {i: max_memory for i in range(args.n_gpus)}
-        device_map = "auto"
+        # trainer.model.save_pretrained(new_model)
 
-        # if we are in a distributed setting, we need to set the device map and max memory per device
-        if os.environ.get('LOCAL_RANK') is not None:
-            local_rank = int(os.environ.get('LOCAL_RANK', '0'))
-            device_map = {'': local_rank}
-            max_memory = {'': max_memory[local_rank]}
+        # ## sets the maximum memory that can be used per device and automatically determines a device mapping for model parts
+        # max_memory = f'{args.max_memory_MB}MB'
+        # max_memory = {i: max_memory for i in range(args.n_gpus)}
+        # device_map = "auto"
 
-        base_model = AutoModelForCausalLM.from_pretrained(
-            args.model_name_or_path,
-            low_cpu_mem_usage = True,
-            return_dict = True,
-            torch_dtype = (torch.float16 if args.fp16 else (torch.bfloat16 if args.bf16 else torch.float32)),
-            device_map = device_map,
-            )
+        # # if we are in a distributed setting, we need to set the device map and max memory per device
+        # if os.environ.get('LOCAL_RANK') is not None:
+        #     local_rank = int(os.environ.get('LOCAL_RANK', '0'))
+        #     device_map = {'': local_rank}
+        #     max_memory = {'': max_memory[local_rank]}
+
+        # base_model = AutoModelForCausalLM.from_pretrained(
+        #     args.model_name_or_path,
+        #     low_cpu_mem_usage = True,
+        #     return_dict = True,
+        #     torch_dtype = (torch.float16 if args.fp16 else (torch.bfloat16 if args.bf16 else torch.float32)),
+        #     device_map = device_map,
+        #     )
         
-        model = PeftModel.from_pretrained(base_model, new_model)
-        model = model.merge_and_unload()
+        # model = PeftModel.from_pretrained(base_model, new_model)
+        # model = model.merge_and_unload()
         
-        # Reload tokenizer to save it
-        tokenizer = AutoTokenizer.from_pretrained(
-            args.model_name_or_path,
-            cache_dir = args.cache_dir,
-            padding_side = "right",
-            use_fast = False, # Fast tokenizer giving issues.
-            tokenizer_type = 'llama' if 'llama' in args.model_name_or_path else None, # Needed for HF name change
-            trust_remote_code = args.trust_remote_code
-        )
-        if tokenizer._pad_token is None:
-            smart_tokenizer_and_embedding_resize(
-                special_tokens_dict = dict(pad_token = DEFAULT_PAD_TOKEN),
-                tokenizer = tokenizer,
-                model = model,
-            )
-        if 'llama' in args.model_name_or_path or isinstance(tokenizer, LlamaTokenizer):
-            # LLaMA tokenizer may not have correct special tokens set.
-            # Check and add them if missing to prevent them from being parsed into different tokens.
-            # Note that these are present in the vocabulary.
-            # Note also that `model.config.pad_token_id` is 0 which corresponds to `<unk>` token.
-            print('Adding special tokens.')
-            tokenizer.add_special_tokens({
-                    "eos_token": tokenizer.convert_ids_to_tokens(model.config.eos_token_id),
-                    "bos_token": tokenizer.convert_ids_to_tokens(model.config.bos_token_id),
-                    "unk_token": tokenizer.convert_ids_to_tokens(
-                        model.config.pad_token_id if (model.config.pad_token_id != -1 and model.config.pad_token_id is not None) else tokenizer.pad_token_id
-                    ),
-            })
+        # # Reload tokenizer to save it
+        # tokenizer = AutoTokenizer.from_pretrained(
+        #     args.model_name_or_path,
+        #     cache_dir = args.cache_dir,
+        #     padding_side = "right",
+        #     use_fast = False, # Fast tokenizer giving issues.
+        #     tokenizer_type = 'llama' if 'llama' in args.model_name_or_path else None, # Needed for HF name change
+        #     trust_remote_code = args.trust_remote_code
+        # )
+        # if tokenizer._pad_token is None:
+        #     smart_tokenizer_and_embedding_resize(
+        #         special_tokens_dict = dict(pad_token = DEFAULT_PAD_TOKEN),
+        #         tokenizer = tokenizer,
+        #         model = model,
+        #     )
+        # if 'llama' in args.model_name_or_path or isinstance(tokenizer, LlamaTokenizer):
+        #     # LLaMA tokenizer may not have correct special tokens set.
+        #     # Check and add them if missing to prevent them from being parsed into different tokens.
+        #     # Note that these are present in the vocabulary.
+        #     # Note also that `model.config.pad_token_id` is 0 which corresponds to `<unk>` token.
+        #     print('Adding special tokens.')
+        #     tokenizer.add_special_tokens({
+        #             "eos_token": tokenizer.convert_ids_to_tokens(model.config.eos_token_id),
+        #             "bos_token": tokenizer.convert_ids_to_tokens(model.config.bos_token_id),
+        #             "unk_token": tokenizer.convert_ids_to_tokens(
+        #                 model.config.pad_token_id if (model.config.pad_token_id != -1 and model.config.pad_token_id is not None) else tokenizer.pad_token_id
+        #             ),
+        #     })
 
-        model.push_to_hub(f"Sharan1712/{new_model}", use_temp_dir = False)
-        tokenizer.push_to_hub(f"Sharan1712/{new_model}", use_temp_dir = False)
+        # model.push_to_hub(f"Sharan1712/{new_model}", use_temp_dir = False)
+        # tokenizer.push_to_hub(f"Sharan1712/{new_model}", use_temp_dir = False)
         print("Uploaded tuned model to HF!!!")
 
 
