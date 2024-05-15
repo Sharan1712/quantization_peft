@@ -123,11 +123,13 @@ class TrainingArguments(transformers.Seq2SeqTrainingArguments):
         default = True,
         metadata = {"help": "Compress the quantization statistics through double quantization."}
     )
+    quant_method: str = field(default = "bnb", metadata = {"help": "Quantization method to use. Should be one of `bnb` or `quanto`."})
     quant_type: str = field(
         default = "nf4",
         metadata = {"help": "Quantization data type to use. Should be one of `fp4` or `nf4`."}
     )
     bits: int = field(default = 4, metadata = {"help": "How many bits to use."})
+    quanto_weight_bits: str = field(default = "int4", metadata = {"help": "How many bits to use. (float8, int8, int4, int2)"})
     lora_r: int = field(default = 64, metadata = {"help": "Lora R dimension."})
     lora_alpha: float = field(default = 16, metadata = {"help": " Lora alpha."})
     lora_dropout: float = field(default = 0.0, metadata = {"help":"Lora dropout."})

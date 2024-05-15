@@ -8,6 +8,7 @@ from transformers.trainer_utils import PREFIX_CHECKPOINT_DIR
 from transformers import (
     AutoTokenizer, 
     AutoModelForCausalLM,
+    QuantoConfig,
     set_seed,
     Seq2SeqTrainer,
     BitsAndBytesConfig,
@@ -102,22 +103,25 @@ def get_accelerate_model(args, checkpoint_dir):
     
     compute_dtype = (torch.float16 if args.fp16 else (torch.bfloat16 if args.bf16 else torch.float32))
 
-    bnb_config = BitsAndBytesConfig(
-        load_in_4bit = args.bits == 4,
-        load_in_8bit = args.bits == 8,
-        llm_int8_threshold = 6.0,
-        llm_int8_has_fp16_weight = False,
-        bnb_4bit_compute_dtype = compute_dtype,
-        bnb_4bit_use_double_quant = args.double_quant,
-        bnb_4bit_quant_type = args.quant_type
-        )
+    if args.quant_method == "bnb":
+        quantization_config = BitsAndBytesConfig(
+            load_in_4bit = args.bits == 4,
+            load_in_8bit = args.bits == 8,
+            llm_int8_threshold = 6.0,
+            llm_int8_has_fp16_weight = False,
+            bnb_4bit_compute_dtype = compute_dtype,
+            bnb_4bit_use_double_quant = args.double_quant,
+            bnb_4bit_quant_type = args.quant_type
+            )
+    elif args.quant_method == "quanto":
+        quantization_config = QuantoConfig(weights = args.quanto_weight_bits)
 
     model = AutoModelForCausalLM.from_pretrained(
         args.model_name_or_path,
         cache_dir = args.cache_dir,
         device_map = device_map,
         max_memory = max_memory,
-        quantization_config = bnb_config,
+        quantization_config = quantization_config,
         torch_dtype = (torch.float16 if args.fp16 else (torch.bfloat16 if args.bf16 else torch.float32)),
         trust_remote_code = args.trust_remote_code,
         token = args.hf_token
