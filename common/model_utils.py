@@ -19,6 +19,7 @@ import bitsandbytes as bnb
 from peft import (
     prepare_model_for_kbit_training,
     LoraConfig,
+    IA3Config,
     get_peft_model,
     PeftModel,
     replace_lora_weights_loftq
@@ -104,6 +105,7 @@ def get_accelerate_model(args, checkpoint_dir):
     compute_dtype = (torch.float16 if args.fp16 else (torch.bfloat16 if args.bf16 else torch.float32))
 
     if args.quant_method == "bnb":
+        print("Using BnB Config to quantize......")
         quantization_config = BitsAndBytesConfig(
             load_in_4bit = args.bits == 4,
             load_in_8bit = args.bits == 8,
@@ -114,6 +116,7 @@ def get_accelerate_model(args, checkpoint_dir):
             bnb_4bit_quant_type = args.quant_type
             )
     elif args.quant_method == "quanto":
+        print("Using Quanto Config to quantize......")
         quantization_config = QuantoConfig(weights = args.quanto_weight_bits)
 
     model = AutoModelForCausalLM.from_pretrained(
@@ -180,22 +183,32 @@ def get_accelerate_model(args, checkpoint_dir):
             print("Loading adapters from checkpoint.")
             model = PeftModel.from_pretrained(model, join(checkpoint_dir, 'adapter_model'), is_trainable = True)
         else:
-            print(f'adding LoRA modules...')
-            modules = find_all_linear_names(args, model)
-            peft_config = LoraConfig(
-                r = args.lora_r,
-                lora_alpha = args.lora_alpha,
-                target_modules = modules,
-                lora_dropout = args.lora_dropout,
-                bias = "none",
-                task_type = "CAUSAL_LM",
-                use_rslora = args.use_rslora,
-                use_dora = args.use_dora
-            )
-            model = get_peft_model(model, peft_config)
-            if args.use_loftq:
-                print(f'Using LoftQ Initialization.....')
-                replace_lora_weights_loftq(model)
+            if args.peft_method == "lora":
+                print(f'adding LoRA modules...')
+                modules = find_all_linear_names(args, model)
+                peft_config = LoraConfig(
+                    r = args.lora_r,
+                    lora_alpha = args.lora_alpha,
+                    target_modules = modules,
+                    lora_dropout = args.lora_dropout,
+                    bias = "none",
+                    task_type = "CAUSAL_LM",
+                    use_rslora = args.use_rslora,
+                    use_dora = args.use_dora
+                )
+                model = get_peft_model(model, peft_config)
+                if args.use_loftq:
+                    print(f'Using LoftQ Initialization.....')
+                    replace_lora_weights_loftq(model)
+            
+            elif args.peft_method == "IA3":
+                print(f'adding IA3 Modules...')
+                modules = find_all_linear_names(args, model)
+                peft_config = IA3Config(
+                    target_modules = modules,
+                    task_type = "CAUSAL_LM"
+                )
+                model = get_peft_model(model, peft_config)
 
     ## iterates through the named modules of the model to perform type casting to the appropriate data types
     for name, module in model.named_modules():

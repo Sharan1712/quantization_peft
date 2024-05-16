@@ -130,6 +130,7 @@ class TrainingArguments(transformers.Seq2SeqTrainingArguments):
     )
     bits: int = field(default = 4, metadata = {"help": "How many bits to use."})
     quanto_weight_bits: str = field(default = "int4", metadata = {"help": "How many bits to use. (float8, int8, int4, int2)"})
+    peft_method: str = field(default = "lora", metadata = {"help": "Which PEFT Method to use (lora, IA3)"})
     lora_r: int = field(default = 64, metadata = {"help": "Lora R dimension."})
     lora_alpha: float = field(default = 16, metadata = {"help": " Lora alpha."})
     lora_dropout: float = field(default = 0.0, metadata = {"help":"Lora dropout."})
@@ -371,64 +372,68 @@ def train():
         print("Uploading tuned model to HF..........")
 
         new_model = args.run_name
-        trainer.model.push_to_hub(f"Sharan1712/{new_model}")
+        #trainer.model.push_to_hub(f"Sharan1712/{new_model}")
         tokenizer.push_to_hub(f"Sharan1712/{new_model}")
+        trainer.model.save_pretrained(new_model)
 
-        # trainer.model.save_pretrained(new_model)
+        ## sets the maximum memory that can be used per device and automatically determines a device mapping for model parts
+        max_memory = f'{args.max_memory_MB}MB'
+        max_memory = {i: max_memory for i in range(args.n_gpus)}
+        device_map = "auto"
 
-        # ## sets the maximum memory that can be used per device and automatically determines a device mapping for model parts
-        # max_memory = f'{args.max_memory_MB}MB'
-        # max_memory = {i: max_memory for i in range(args.n_gpus)}
-        # device_map = "auto"
+        # if we are in a distributed setting, we need to set the device map and max memory per device
+        if os.environ.get('LOCAL_RANK') is not None:
+            local_rank = int(os.environ.get('LOCAL_RANK', '0'))
+            device_map = {'': local_rank}
+            max_memory = {'': max_memory[local_rank]}
 
-        # # if we are in a distributed setting, we need to set the device map and max memory per device
-        # if os.environ.get('LOCAL_RANK') is not None:
-        #     local_rank = int(os.environ.get('LOCAL_RANK', '0'))
-        #     device_map = {'': local_rank}
-        #     max_memory = {'': max_memory[local_rank]}
+        compute_dtype = (torch.float16 if args.fp16 else (torch.bfloat16 if args.bf16 else torch.float32))
+        torch.cuda.empty_cache()
 
-        # base_model = AutoModelForCausalLM.from_pretrained(
-        #     args.model_name_or_path,
-        #     low_cpu_mem_usage = True,
-        #     return_dict = True,
-        #     torch_dtype = (torch.float16 if args.fp16 else (torch.bfloat16 if args.bf16 else torch.float32)),
-        #     device_map = device_map,
-        #     )
+        if args.peft_method == "lora":
+            
+            if args.quant_method == "bnb":
+                print("Using BnB Config to quantize......")
+                quantization_config = BitsAndBytesConfig(
+                    load_in_4bit = args.bits == 4,
+                    load_in_8bit = args.bits == 8,
+                    llm_int8_threshold = 6.0,
+                    llm_int8_has_fp16_weight = False,
+                    bnb_4bit_compute_dtype = compute_dtype,
+                    bnb_4bit_use_double_quant = args.double_quant,
+                    bnb_4bit_quant_type = args.quant_type
+                    )
+            elif args.quant_method == "quanto":
+                print("Using Quanto Config to quantize......")
+                quantization_config = QuantoConfig(weights = args.quanto_weight_bits)
+
+            base_model = AutoModelForCausalLM.from_pretrained(
+                args.model_name_or_path,
+                low_cpu_mem_usage = True,
+                device_map = device_map,
+                quantization_config = quantization_config,
+                max_memory = max_memory,
+                torch_dtype = (torch.float16 if args.fp16 else (torch.bfloat16 if args.bf16 else torch.float32)),
+                trust_remote_code = args.trust_remote_code,
+                token = args.hf_token
+            )
+        else:
+            base_model = AutoModelForCausalLM.from_pretrained(
+                args.model_name_or_path,
+                low_cpu_mem_usage = True,
+                device_map = device_map,
+                max_memory = max_memory,
+                torch_dtype = (torch.float16 if args.fp16 else (torch.bfloat16 if args.bf16 else torch.float32)),
+                trust_remote_code = args.trust_remote_code,
+                token = args.hf_token
+            )
+        base_model.resize_token_embeddings(len(tokenizer))
+
+        print("Merging Base model + Adapter")
+        model_to_push = PeftModel.from_pretrained(base_model, new_model)
+        model_to_push = model_to_push.merge_and_unload()
         
-        # model = PeftModel.from_pretrained(base_model, new_model)
-        # model = model.merge_and_unload()
-        
-        # # Reload tokenizer to save it
-        # tokenizer = AutoTokenizer.from_pretrained(
-        #     args.model_name_or_path,
-        #     cache_dir = args.cache_dir,
-        #     padding_side = "right",
-        #     use_fast = False, # Fast tokenizer giving issues.
-        #     tokenizer_type = 'llama' if 'llama' in args.model_name_or_path else None, # Needed for HF name change
-        #     trust_remote_code = args.trust_remote_code
-        # )
-        # if tokenizer._pad_token is None:
-        #     smart_tokenizer_and_embedding_resize(
-        #         special_tokens_dict = dict(pad_token = DEFAULT_PAD_TOKEN),
-        #         tokenizer = tokenizer,
-        #         model = model,
-        #     )
-        # if 'llama' in args.model_name_or_path or isinstance(tokenizer, LlamaTokenizer):
-        #     # LLaMA tokenizer may not have correct special tokens set.
-        #     # Check and add them if missing to prevent them from being parsed into different tokens.
-        #     # Note that these are present in the vocabulary.
-        #     # Note also that `model.config.pad_token_id` is 0 which corresponds to `<unk>` token.
-        #     print('Adding special tokens.')
-        #     tokenizer.add_special_tokens({
-        #             "eos_token": tokenizer.convert_ids_to_tokens(model.config.eos_token_id),
-        #             "bos_token": tokenizer.convert_ids_to_tokens(model.config.bos_token_id),
-        #             "unk_token": tokenizer.convert_ids_to_tokens(
-        #                 model.config.pad_token_id if (model.config.pad_token_id != -1 and model.config.pad_token_id is not None) else tokenizer.pad_token_id
-        #             ),
-        #     })
-
-        # model.push_to_hub(f"Sharan1712/{new_model}", use_temp_dir = False)
-        # tokenizer.push_to_hub(f"Sharan1712/{new_model}", use_temp_dir = False)
+        model_to_push.push_to_hub(f"Sharan1712/{new_model}")
         print("Uploaded tuned model to HF!!!")
 
 
