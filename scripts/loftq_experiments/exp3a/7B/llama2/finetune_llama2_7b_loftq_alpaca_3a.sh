@@ -20,10 +20,12 @@ python main.py \
     --do_train \
     --do_eval \
     --do_mmlu_eval \
+    --peft_method lora \
     --use_loftq True \
     --lora_r 64 \
     --lora_alpha 16 \
     --lora_modules all \
+    --lora_dropout 0.1 \
     --double_quant \
     --quant_type nf4 \
     --bf16 \
@@ -42,6 +44,5 @@ python main.py \
     --learning_rate 0.0002 \
     --adam_beta2 0.999 \
     --max_grad_norm 0.3 \
-    --lora_dropout 0.1 \
     --weight_decay 0.001 \
     --seed 2024 \

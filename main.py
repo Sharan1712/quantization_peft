@@ -99,7 +99,7 @@ class TrainingArguments(transformers.Seq2SeqTrainingArguments):
     report_to: str = field(default = "wandb", metadata = {"help":"Where to log losses"})
     run_name: str = field(default = "experiment-1", metadata = {"help":"Name of the run to see on W&B"})
     n_gpus: int = field(default = 2, metadata = {"help": "Number of GPUs to use while training."})
-    cache_dir: Optional[str] = field(default = None)
+    cache_dir: str = field(default = "./cache")
     train_on_source: Optional[bool] = field(
         default = False,
         metadata = {"help": "Whether to train on the input in addition to the target text."}
