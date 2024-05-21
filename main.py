@@ -50,15 +50,15 @@ class ModelArguments:
         metadata = {"help": "Enable unpickling of arbitrary code in AutoModelForCausalLM#from_pretrained."}
     )
     hf_token: Optional[str] = field(
-        default = "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",
+        default = "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",
         metadata = {"help": "Enables using Huggingface auth token from Git Credentials."}
     )
 
 ## We set the DataArguments
 @dataclass
 class DataArguments:
-    eval_dataset_size: int = field(
-        default = 1024, metadata={"help": "Size of validation dataset."}
+    eval_dataset_size: float = field(
+        default = 0.3, metadata={"help": "Size of validation dataset."}
     )
     max_train_samples: Optional[int] = field(
         default = None,
@@ -93,10 +93,13 @@ class DataArguments:
 
 @dataclass
 class TrainingArguments(transformers.Seq2SeqTrainingArguments):
+    upload_to_hub: bool = field(default = True, metadata = {"help":"Whether or not to upload the finetuned model"} )
+    #load_best_model_at_end: bool = field(default = True, metadata = {"help":"Whether or not to load the best model found during training at the end of training"} )
+    #metric_for_best_model: str = field(default = "eval_loss", metadata = {"help":"specify the metric to use to compare two different models"})
     report_to: str = field(default = "wandb", metadata = {"help":"Where to log losses"})
     run_name: str = field(default = "experiment-1", metadata = {"help":"Name of the run to see on W&B"})
     n_gpus: int = field(default = 2, metadata = {"help": "Number of GPUs to use while training."})
-    cache_dir: Optional[str] = field(default = None)
+    cache_dir: str = field(default = "./cache")
     train_on_source: Optional[bool] = field(
         default = False,
         metadata = {"help": "Whether to train on the input in addition to the target text."}
@@ -120,11 +123,14 @@ class TrainingArguments(transformers.Seq2SeqTrainingArguments):
         default = True,
         metadata = {"help": "Compress the quantization statistics through double quantization."}
     )
+    quant_method: str = field(default = "bnb", metadata = {"help": "Quantization method to use. Should be one of `bnb` or `quanto`."})
     quant_type: str = field(
         default = "nf4",
         metadata = {"help": "Quantization data type to use. Should be one of `fp4` or `nf4`."}
     )
     bits: int = field(default = 4, metadata = {"help": "How many bits to use."})
+    quanto_weight_bits: str = field(default = "int4", metadata = {"help": "How many bits to use. (float8, int8, int4, int2)"})
+    peft_method: str = field(default = "lora", metadata = {"help": "Which PEFT Method to use (lora, IA3)"})
     lora_r: int = field(default = 64, metadata = {"help": "Lora R dimension."})
     lora_alpha: float = field(default = 16, metadata = {"help": " Lora alpha."})
     lora_dropout: float = field(default = 0.0, metadata = {"help":"Lora dropout."})
@@ -361,6 +367,75 @@ def train():
         trainer.log_metrics("predict", prediction_metrics)
         trainer.save_metrics("predict", prediction_metrics)
         all_metrics.update(prediction_metrics)
+
+    if args.upload_to_hub:
+        print("Uploading tuned model to HF..........")
+
+        new_model = args.run_name
+        #trainer.model.push_to_hub(f"Sharan1712/{new_model}")
+        tokenizer.push_to_hub(f"Sharan1712/{new_model}")
+        trainer.model.save_pretrained(new_model)
+
+        ## sets the maximum memory that can be used per device and automatically determines a device mapping for model parts
+        max_memory = f'{args.max_memory_MB}MB'
+        max_memory = {i: max_memory for i in range(args.n_gpus)}
+        device_map = "auto"
+
+        # if we are in a distributed setting, we need to set the device map and max memory per device
+        if os.environ.get('LOCAL_RANK') is not None:
+            local_rank = int(os.environ.get('LOCAL_RANK', '0'))
+            device_map = {'': local_rank}
+            max_memory = {'': max_memory[local_rank]}
+
+        compute_dtype = (torch.float16 if args.fp16 else (torch.bfloat16 if args.bf16 else torch.float32))
+        torch.cuda.empty_cache()
+
+        if args.peft_method == "lora":
+            
+            if args.quant_method == "bnb":
+                print("Using BnB Config to quantize......")
+                quantization_config = BitsAndBytesConfig(
+                    load_in_4bit = args.bits == 4,
+                    load_in_8bit = args.bits == 8,
+                    llm_int8_threshold = 6.0,
+                    llm_int8_has_fp16_weight = False,
+                    bnb_4bit_compute_dtype = compute_dtype,
+                    bnb_4bit_use_double_quant = args.double_quant,
+                    bnb_4bit_quant_type = args.quant_type
+                    )
+            elif args.quant_method == "quanto":
+                print("Using Quanto Config to quantize......")
+                quantization_config = QuantoConfig(weights = args.quanto_weight_bits)
+
+            base_model = AutoModelForCausalLM.from_pretrained(
+                args.model_name_or_path,
+                low_cpu_mem_usage = True,
+                device_map = device_map,
+                quantization_config = quantization_config,
+                max_memory = max_memory,
+                torch_dtype = (torch.float16 if args.fp16 else (torch.bfloat16 if args.bf16 else torch.float32)),
+                trust_remote_code = args.trust_remote_code,
+                token = args.hf_token
+            )
+        else:
+            base_model = AutoModelForCausalLM.from_pretrained(
+                args.model_name_or_path,
+                low_cpu_mem_usage = True,
+                device_map = device_map,
+                max_memory = max_memory,
+                torch_dtype = (torch.float16 if args.fp16 else (torch.bfloat16 if args.bf16 else torch.float32)),
+                trust_remote_code = args.trust_remote_code,
+                token = args.hf_token
+            )
+        base_model.resize_token_embeddings(len(tokenizer))
+
+        print("Merging Base model + Adapter")
+        model_to_push = PeftModel.from_pretrained(base_model, new_model)
+        model_to_push = model_to_push.merge_and_unload()
+        
+        model_to_push.push_to_hub(f"Sharan1712/{new_model}")
+        print("Uploaded tuned model to HF!!!")
+
 
     if (args.do_train or args.do_eval or args.do_predict):
         with open(os.path.join(args.output_dir, "metrics.json"), "w") as fout:

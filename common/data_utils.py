@@ -237,6 +237,9 @@ def make_data_module(tokenizer: transformers.PreTrainedTokenizer, args) -> Dict:
             train_dataset = train_dataset.select(range(args.max_train_samples))
         if args.group_by_length:
             train_dataset = train_dataset.map(lambda x: {'length': len(x['input']) + len(x['output'])})
+        
+        print(f"Samples in Train dataset = {len(train_dataset)}")
+        print(f"Samples in Eval dataset = {len(eval_dataset)}")
 
     data_collator = DataCollatorForCausalLM(
         tokenizer = tokenizer,
