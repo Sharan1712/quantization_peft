@@ -99,7 +99,7 @@ class TrainingArguments(transformers.Seq2SeqTrainingArguments):
     report_to: str = field(default = "wandb", metadata = {"help":"Where to log losses"})
     run_name: str = field(default = "experiment-1", metadata = {"help":"Name of the run to see on W&B"})
     n_gpus: int = field(default = 2, metadata = {"help": "Number of GPUs to use while training."})
-    cache_dir: str = field(default = "./cache")
+    cache_dir: str = field(default = None)
     train_on_source: Optional[bool] = field(
         default = False,
         metadata = {"help": "Whether to train on the input in addition to the target text."}
@@ -137,7 +137,7 @@ class TrainingArguments(transformers.Seq2SeqTrainingArguments):
     use_rslora: bool = field(default = False, metadata = {"help": 'When set to True, uses Rank-Stabilized LoRA which sets the adapter scaling factor to lora_alpha/math.sqrt(r), since it was proven to work better.'})
     use_dora: bool = field(default = False, metadata = {"help": 'Whether to include DoRA (Weight Decomposed Low Rank Adaptation)'})
     use_loftq: bool = field(default = False, metadata = {"help": 'Whether to initialize the LoRA Adapter weights using LoftQ initialization.'})
-    max_memory_MB: int = field(default = 49000, metadata = {"help": "Free memory per gpu."})
+    max_memory_MB: int = field(default = 46000, metadata = {"help": "Free memory per gpu."})
     report_to: str = field(default = 'none', metadata = {"help": "To use wandb or something else for reporting."})
     sft: bool = field(default = False, metadata = {"help": "If True, use the SupervisedFineTuning Trainer of HF else use Seq2SeqTrainer"})
     output_dir: str = field(default = './output', metadata = {"help": 'The output dir for logs and checkpoints'})
@@ -212,7 +212,7 @@ def train():
     model, tokenizer, peft_config = get_accelerate_model(args, checkpoint_dir)
 
     model.config.use_cache = False
-    #model.enable_gradient_checkpointing(gradient_checkpointing_kwargs={"use_reentrant": False})
+    #model.gradient_checkpointing_enable(gradient_checkpointing_kwargs={"use_reentrant": True})
     print('loaded model')
     set_seed(args.seed)
 
@@ -415,6 +415,7 @@ def train():
                 max_memory = max_memory,
                 torch_dtype = (torch.float16 if args.fp16 else (torch.bfloat16 if args.bf16 else torch.float32)),
                 trust_remote_code = args.trust_remote_code,
+                use_safetensors = True,
                 token = args.hf_token
             )
         else:

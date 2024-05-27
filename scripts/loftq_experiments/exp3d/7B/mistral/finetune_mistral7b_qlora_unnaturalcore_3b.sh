@@ -1,18 +1,17 @@
 python main.py \
-    --model_name_or_path meta-llama/Llama-2-7b-hf \
+    --model_name_or_path mistralai/Mistral-7B-v0.3 \
     --hf_token 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 \
     --use_auth \
-    --upload_to_hub True \
-    --output_dir ./output/loftq_exp/7B/llama2-7b-unnatural-core-loftq-4bit \
+    --output_dir ./output/loftq_exp/exp3d/7B/mistral-7b-unnatural-core-loftq-4bit \
     --report_to wandb \
-    --run_name llama2_7B_unnaturalcore_loftq_4bit \
+    --run_name mistral_7B_unnaturalcore_loftq_4bit_3d \
     --logging_steps 25 \
     --save_strategy steps \
     --data_seed 2024 \
     --save_steps 500 \
     --save_total_limit 40 \
     --evaluation_strategy steps \
-    --eval_dataset_size 0.3 \
+    --eval_dataset_size 0.2 \
     --per_device_eval_batch_size 6 \
     --dataloader_num_workers 1 \
     --group_by_length \
@@ -22,7 +21,8 @@ python main.py \
     --do_eval \
     --do_mmlu_eval \
     --use_loftq True \
-    --lora_r 64 \
+    --use_rslora True \
+    --lora_r 8 \
     --lora_alpha 16 \
     --lora_modules all \
     --double_quant \

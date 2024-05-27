@@ -1,10 +1,10 @@
 python main.py \
-    --model_name_or_path mistralai/Mistral-7B-v0.3 \
+    --model_name_or_path meta-llama/Llama-2-7b-hf \
     --hf_token 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 \
     --use_auth \
-    --output_dir ./output/qlora_exp/exp1a/7B/mistral-7b-hhrlhf-qlora-4bit \
+    --output_dir ./output/loftq_exp/exp3d/7B/llama2-7b-alpaca-loftq-4bit \
     --report_to wandb \
-    --run_name mistral_7B_hhrlhf_qlora_4bit_1a \
+    --run_name llama2_7B_alpaca_loftq_4bit_3d \
     --logging_steps 25 \
     --save_strategy steps \
     --data_seed 2024 \
@@ -20,9 +20,13 @@ python main.py \
     --do_train \
     --do_eval \
     --do_mmlu_eval \
-    --lora_r 64 \
+    --use_loftq True \
+    --use_rslora True \
+    --peft_method lora \
+    --lora_r 8 \
     --lora_alpha 16 \
     --lora_modules all \
+    --lora_dropout 0.1 \
     --double_quant \
     --quant_type nf4 \
     --bf16 \
@@ -30,9 +34,10 @@ python main.py \
     --warmup_ratio 0.03 \
     --lr_scheduler_type constant \
     --gradient_checkpointing \
-    --dataset hh-rlhf \
-    --dataset_format hh-rlhf \
-    --target_max_len 768 \
+    --dataset alpaca \
+    --dataset_format alpaca \
+    --source_max_len 384 \
+    --target_max_len 128 \
     --per_device_train_batch_size 8 \
     --gradient_accumulation_steps 16 \
     --max_steps 5000 \
@@ -40,6 +45,5 @@ python main.py \
     --learning_rate 0.0002 \
     --adam_beta2 0.999 \
     --max_grad_norm 0.3 \
-    --lora_dropout 0.1 \
     --weight_decay 0.001 \
     --seed 2024 \
