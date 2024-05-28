@@ -1,10 +1,10 @@
 python main.py \
-    --model_name_or_path meta-llama/Llama-2-7b-hf \
+    --model_name_or_path google/gemma-7b \
     --hf_token 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 \
     --use_auth \
-    --output_dir ./output/loftq_exp/exp3c/7B/llama2-7b-self-instruct-loftq-4bit \
+    --output_dir ./output/qdora_exp/exp5a/7B/gemma-7b-unnatural-core-qdora-4bit \
     --report_to wandb \
-    --run_name llama2_7B_selfinstruct_loftq_4bit_3c \
+    --run_name gemma_7B_unnaturalcore_qdora_4bit_5a \
     --logging_steps 25 \
     --save_strategy steps \
     --data_seed 2024 \
@@ -19,11 +19,12 @@ python main.py \
     --remove_unused_columns False \
     --do_train \
     --do_eval \
+    --do_predict \
     --do_mmlu_eval \
-    --use_loftq True \
-    --lora_r 8 \
+    --lora_r 64 \
     --lora_alpha 16 \
     --lora_modules all \
+    --use_dora True \
     --double_quant \
     --quant_type nf4 \
     --bf16 \
@@ -31,8 +32,8 @@ python main.py \
     --warmup_ratio 0.03 \
     --lr_scheduler_type constant \
     --gradient_checkpointing \
-    --dataset self-instruct \
-    --dataset_format self-instruct \
+    --dataset unnatural-core \
+    --dataset_format unnatural-core \
     --source_max_len 384 \
     --target_max_len 128 \
     --per_device_train_batch_size 8 \

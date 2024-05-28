@@ -2,9 +2,9 @@ python main.py \
     --model_name_or_path meta-llama/Llama-2-7b-hf \
     --hf_token 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 \
     --use_auth \
-    --output_dir ./output/loftq_exp/exp3c/7B/llama2-7b-self-instruct-loftq-4bit \
+    --output_dir ./output/loftq_exp/exp3f/7B/llama2-7b-alpaca-loftq-4bit \
     --report_to wandb \
-    --run_name llama2_7B_selfinstruct_loftq_4bit_3c \
+    --run_name llama2_7B_alpaca_loftq_4bit_3f \
     --logging_steps 25 \
     --save_strategy steps \
     --data_seed 2024 \
@@ -13,17 +13,20 @@ python main.py \
     --evaluation_strategy steps \
     --eval_dataset_size 0.2 \
     --per_device_eval_batch_size 6 \
-    --dataloader_num_workers 1 \
     --group_by_length \
+    --dataloader_num_workers 1 \
     --logging_strategy steps \
     --remove_unused_columns False \
     --do_train \
     --do_eval \
     --do_mmlu_eval \
     --use_loftq True \
-    --lora_r 8 \
-    --lora_alpha 16 \
+    --use_rslora True \
+    --peft_method lora \
+    --lora_r 16 \
+    --lora_alpha 32 \
     --lora_modules all \
+    --lora_dropout 0.1 \
     --double_quant \
     --quant_type nf4 \
     --bf16 \
@@ -31,8 +34,8 @@ python main.py \
     --warmup_ratio 0.03 \
     --lr_scheduler_type constant \
     --gradient_checkpointing \
-    --dataset self-instruct \
-    --dataset_format self-instruct \
+    --dataset alpaca \
+    --dataset_format alpaca \
     --source_max_len 384 \
     --target_max_len 128 \
     --per_device_train_batch_size 8 \
@@ -42,6 +45,5 @@ python main.py \
     --learning_rate 0.0002 \
     --adam_beta2 0.999 \
     --max_grad_norm 0.3 \
-    --lora_dropout 0.1 \
     --weight_decay 0.001 \
     --seed 2024 \
