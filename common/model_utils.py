@@ -127,6 +127,7 @@ def get_accelerate_model(args, checkpoint_dir):
         quantization_config = quantization_config,
         torch_dtype = (torch.float16 if args.fp16 else (torch.bfloat16 if args.bf16 else torch.float32)),
         trust_remote_code = args.trust_remote_code,
+        use_safetensors = True,
         token = args.hf_token
     )
     if compute_dtype == torch.float16 and args.bits == 4:
@@ -145,13 +146,15 @@ def get_accelerate_model(args, checkpoint_dir):
 
     model.config.torch_dtype = (torch.float16 if args.fp16 else (torch.bfloat16 if args.bf16 else torch.float32))
 
+    tokenizer_type = 'llama' if 'llama' in args.model_name_or_path else None
+
     # Initializing the Tokenizer
     tokenizer = AutoTokenizer.from_pretrained(
         args.model_name_or_path,
         cache_dir = args.cache_dir,
         padding_side = "right",
         use_fast = False, # Fast tokenizer giving issues.
-        tokenizer_type = 'llama' if 'llama' in args.model_name_or_path else None, # Needed for HF name change
+        tokenizer_type = tokenizer_type, # Needed for HF name change
         trust_remote_code = args.trust_remote_code,
         token = args.hf_token,
     )

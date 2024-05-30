@@ -4,7 +4,7 @@ python main.py \
     --use_auth \
     --output_dir ./output/loftq_exp/exp3b/7B/llama2-7b-self-instruct-loftq-4bit \
     --report_to wandb \
-    --run_name llama2_7B_selfinstruct_loftq_4bit_1b \
+    --run_name llama2_7B_selfinstruct_loftq_4bit_3b \
     --logging_steps 25 \
     --save_strategy steps \
     --data_seed 2024 \

@@ -1,5 +1,5 @@
 python main.py \
-    --model_name_or_path mistralai/Mistral-7B-Instruct-v0.2 \
+    --model_name_or_path mistralai/Mistral-7B-v0.3 \
     --hf_token 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 \
     --use_auth \
     --output_dir ./output/qlora_exp/exp1c/7B/mistral-7b-alpaca-qlora-4bit \
