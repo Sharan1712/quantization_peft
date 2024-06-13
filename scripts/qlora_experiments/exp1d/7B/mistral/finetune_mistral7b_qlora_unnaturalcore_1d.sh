@@ -1,10 +1,10 @@
 python main.py \
-    --model_name_or_path meta-llama/Meta-Llama-3-8B \
+    --model_name_or_path mistralai/Mistral-7B-v0.3 \
     --hf_token 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 \
     --use_auth \
-    --output_dir ./output/qlora_exp/exp1c/8B/llama3-8b-self-instruct-qlora-4bit \
+    --output_dir ./output/qlora_exp/exp1d/7B/mistral-7b-unnatural-core-qlora-4bit \
     --report_to wandb \
-    --run_name llama3_8B_selfinstruct_qlora_4bit_1c \
+    --run_name mistral_7B_unnaturalcore_qlora_4bit_1d \
     --logging_steps 25 \
     --save_strategy steps \
     --data_seed 2024 \
@@ -19,9 +19,10 @@ python main.py \
     --remove_unused_columns False \
     --do_train \
     --do_eval \
+    --do_predict \
     --do_mmlu_eval \
-    --lora_r 16 \
-    --lora_alpha 32 \
+    --lora_r 64 \
+    --lora_alpha 128 \
     --lora_modules all \
     --double_quant \
     --quant_type nf4 \
@@ -30,11 +31,11 @@ python main.py \
     --warmup_ratio 0.03 \
     --lr_scheduler_type constant \
     --gradient_checkpointing \
-    --dataset self-instruct \
-    --dataset_format self-instruct \
+    --dataset unnatural-core \
+    --dataset_format unnatural-core \
     --source_max_len 384 \
     --target_max_len 128 \
-    --per_device_train_batch_size 4 \
+    --per_device_train_batch_size 8 \
     --gradient_accumulation_steps 16 \
     --max_steps 5000 \
     --eval_steps 500 \

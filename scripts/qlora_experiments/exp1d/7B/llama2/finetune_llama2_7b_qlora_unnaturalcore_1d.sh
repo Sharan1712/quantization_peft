@@ -1,17 +1,17 @@
 python main.py \
-    --model_name_or_path meta-llama/Meta-Llama-3-8B \
+    --model_name_or_path meta-llama/Llama-2-7b-hf \
     --hf_token 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 \
     --use_auth \
-    --output_dir ./output/qlora_exp/exp1a/8B/llama3-8b-self-instruct-qlora-4bit \
+    --output_dir ./output/qlora_exp/exp1d/7B/llama2-7b-unnatural-core-qlora-4bit \
     --report_to wandb \
-    --run_name llama3_8B_selfinstruct_qlora_4bit_1a \
+    --run_name llama2_7B_unnaturalcore_qlora_4bit_1d \
     --logging_steps 25 \
     --save_strategy steps \
     --data_seed 2024 \
     --save_steps 500 \
     --save_total_limit 40 \
     --evaluation_strategy steps \
-    --eval_dataset_size 0.3 \
+    --eval_dataset_size 0.2 \
     --per_device_eval_batch_size 6 \
     --dataloader_num_workers 1 \
     --group_by_length \
@@ -19,9 +19,10 @@ python main.py \
     --remove_unused_columns False \
     --do_train \
     --do_eval \
+    --do_predict \
     --do_mmlu_eval \
     --lora_r 64 \
-    --lora_alpha 16 \
+    --lora_alpha 128 \
     --lora_modules all \
     --double_quant \
     --quant_type nf4 \
@@ -30,8 +31,8 @@ python main.py \
     --warmup_ratio 0.03 \
     --lr_scheduler_type constant \
     --gradient_checkpointing \
-    --dataset self-instruct \
-    --dataset_format self-instruct \
+    --dataset unnatural-core \
+    --dataset_format unnatural-core \
     --source_max_len 384 \
     --target_max_len 128 \
     --per_device_train_batch_size 4 \

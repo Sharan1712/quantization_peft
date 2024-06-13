@@ -35,7 +35,7 @@ python main.py \
     --dataset_format unnatural-core \
     --source_max_len 384 \
     --target_max_len 128 \
-    --per_device_train_batch_size 4 \
+    --per_device_train_batch_size 8 \
     --gradient_accumulation_steps 16 \
     --max_steps 5000 \
     --eval_steps 500 \

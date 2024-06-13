@@ -8,12 +8,10 @@ from transformers.trainer_utils import PREFIX_CHECKPOINT_DIR
 from transformers import (
     AutoTokenizer, 
     AutoModelForCausalLM,
-    QuantoConfig,
     set_seed,
     Seq2SeqTrainer,
     BitsAndBytesConfig,
-    LlamaTokenizer
-
+    LlamaTokenizer,
 )
 import bitsandbytes as bnb
 from peft import (
@@ -115,9 +113,9 @@ def get_accelerate_model(args, checkpoint_dir):
             bnb_4bit_use_double_quant = args.double_quant,
             bnb_4bit_quant_type = args.quant_type
             )
-    elif args.quant_method == "quanto":
-        print("Using Quanto Config to quantize......")
-        quantization_config = QuantoConfig(weights = args.quanto_weight_bits)
+    elif args.quant_method == "hhq":
+        print("Using HQQ Config to quantize......")
+        #quantization_config = HqqConfig(nbits = args.bits)
 
     model = AutoModelForCausalLM.from_pretrained(
         args.model_name_or_path,

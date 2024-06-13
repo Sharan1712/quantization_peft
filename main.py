@@ -123,13 +123,12 @@ class TrainingArguments(transformers.Seq2SeqTrainingArguments):
         default = True,
         metadata = {"help": "Compress the quantization statistics through double quantization."}
     )
-    quant_method: str = field(default = "bnb", metadata = {"help": "Quantization method to use. Should be one of `bnb` or `quanto`."})
+    quant_method: str = field(default = "bnb", metadata = {"help": "Quantization method to use. Should be one of `bnb` or `hqq`."})
     quant_type: str = field(
         default = "nf4",
         metadata = {"help": "Quantization data type to use. Should be one of `fp4` or `nf4`."}
     )
-    bits: int = field(default = 4, metadata = {"help": "How many bits to use."})
-    quanto_weight_bits: str = field(default = "int4", metadata = {"help": "How many bits to use. (float8, int8, int4, int2)"})
+    bits: int = field(default = 4, metadata = {"help": "How many bits to use. If quant_method is bnb, either 8 or 4 else 1,2,3,4,8"})
     peft_method: str = field(default = "lora", metadata = {"help": "Which PEFT Method to use (lora, IA3)"})
     lora_r: int = field(default = 64, metadata = {"help": "Lora R dimension."})
     lora_alpha: float = field(default = 16, metadata = {"help": " Lora alpha."})
@@ -403,9 +402,9 @@ def train():
                     bnb_4bit_use_double_quant = args.double_quant,
                     bnb_4bit_quant_type = args.quant_type
                     )
-            elif args.quant_method == "quanto":
-                print("Using Quanto Config to quantize......")
-                quantization_config = QuantoConfig(weights = args.quanto_weight_bits)
+            elif args.quant_method == "hhq":
+                print("Using HQQ Config to quantize......")
+                #quantization_config = HqqConfig(nbits = args.bits)
 
             base_model = AutoModelForCausalLM.from_pretrained(
                 args.model_name_or_path,
