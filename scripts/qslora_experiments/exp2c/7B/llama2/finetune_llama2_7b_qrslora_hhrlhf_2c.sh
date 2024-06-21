@@ -12,6 +12,7 @@ python main.py \
     --save_total_limit 40 \
     --evaluation_strategy steps \
     --eval_dataset_size 0.2 \
+    --max_eval_samples 1000 \
     --per_device_eval_batch_size 6 \
     --group_by_length \
     --dataloader_num_workers 1 \

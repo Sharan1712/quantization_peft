@@ -11,7 +11,8 @@ python main.py \
     --save_steps 500 \
     --save_total_limit 40 \
     --evaluation_strategy steps \
-    --eval_dataset_size 0.3 \
+    --eval_dataset_size 0.2 \
+    --max_eval_samples 1000 \
     --per_device_eval_batch_size 6 \
     --dataloader_num_workers 1 \
     --group_by_length \
@@ -19,7 +20,6 @@ python main.py \
     --remove_unused_columns False \
     --do_train \
     --do_eval \
-    --do_predict \
     --do_mmlu_eval \
     --lora_r 64 \
     --lora_alpha 16 \

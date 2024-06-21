@@ -50,7 +50,7 @@ class ModelArguments:
         metadata = {"help": "Enable unpickling of arbitrary code in AutoModelForCausalLM#from_pretrained."}
     )
     hf_token: Optional[str] = field(
-        default = "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",
+        default = "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",
         metadata = {"help": "Enables using Huggingface auth token from Git Credentials."}
     )
 
