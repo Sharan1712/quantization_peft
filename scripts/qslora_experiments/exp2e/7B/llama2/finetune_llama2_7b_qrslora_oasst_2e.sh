@@ -1,29 +1,27 @@
 python main.py \
     --model_name_or_path meta-llama/Llama-2-7b-hf \
     --use_auth \
-    --output_dir ./output/loftq_exp/exp3b/7B/llama2-7b-unnatural-core-loftq-4bit \
+    --output_dir ./output/qrslora_exp/exp2e/7B/llama2-7b-oasst-qrslora-4bit \
     --report_to wandb \
-    --run_name llama2_7B_unnaturalcore_loftq_4bit_3b \
+    --run_name llama2_7B_oasst_qrslora_4bit_2e \
     --logging_steps 25 \
     --save_strategy steps \
     --data_seed 2024 \
-    --save_steps 1500 \
+    --save_steps 500 \
     --save_total_limit 40 \
     --evaluation_strategy steps \
     --eval_dataset_size 0.2 \
-    --max_eval_samples 1000 \
     --per_device_eval_batch_size 6 \
-    --dataloader_num_workers 1 \
     --group_by_length \
+    --dataloader_num_workers 1 \
     --logging_strategy steps \
     --remove_unused_columns False \
     --do_train \
     --do_eval \
     --do_mmlu_eval \
-    --use_loftq True \
+    --lora_r 256 \
+    --lora_alpha 128 \
     --use_rslora True \
-    --lora_r 64 \
-    --lora_alpha 16 \
     --lora_modules all \
     --double_quant \
     --quant_type nf4 \
@@ -32,14 +30,13 @@ python main.py \
     --warmup_ratio 0.03 \
     --lr_scheduler_type constant \
     --gradient_checkpointing \
-    --dataset unnatural-core \
-    --dataset_format unnatural-core \
-    --source_max_len 384 \
-    --target_max_len 128 \
+    --dataset oasst1 \
+    --dataset_format oasst1 \
+    --target_max_len 512 \
     --per_device_train_batch_size 8 \
     --gradient_accumulation_steps 16 \
-    --max_steps 5000 \
-    --eval_steps 500 \
+    --max_steps 1875 \
+    --eval_steps 187 \
     --learning_rate 0.0002 \
     --adam_beta2 0.999 \
     --max_grad_norm 0.3 \

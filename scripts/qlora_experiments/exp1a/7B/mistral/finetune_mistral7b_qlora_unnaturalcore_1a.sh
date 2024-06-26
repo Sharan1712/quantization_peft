@@ -1,6 +1,5 @@
 python main.py \
     --model_name_or_path mistralai/Mistral-7B-v0.3 \
-    --hf_token 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 \
     --use_auth \
     --output_dir ./output/qlora_exp/exp1a/7B/mistral-7b-unnatural-core-qlora-4bit \
     --report_to wandb \

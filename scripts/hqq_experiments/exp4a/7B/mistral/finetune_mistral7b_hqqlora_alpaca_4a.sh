@@ -1,13 +1,13 @@
 python main.py \
-    --model_name_or_path meta-llama/Llama-2-7b-hf \
+    --model_name_or_path mistralai/Mistral-7B-v0.3 \
     --use_auth \
-    --output_dir ./output/loftq_exp/exp3b/7B/llama2-7b-unnatural-core-loftq-4bit \
+    --output_dir ./output/hqq_exp/exp4a/7B/mistral-7b-alpaca-hqqlora-4bit \
     --report_to wandb \
-    --run_name llama2_7B_unnaturalcore_loftq_4bit_3b \
+    --run_name mistral_7B_alpaca_hqqlora_4bit_4a \
     --logging_steps 25 \
     --save_strategy steps \
     --data_seed 2024 \
-    --save_steps 1500 \
+    --save_steps 500 \
     --save_total_limit 40 \
     --evaluation_strategy steps \
     --eval_dataset_size 0.2 \
@@ -20,20 +20,17 @@ python main.py \
     --do_train \
     --do_eval \
     --do_mmlu_eval \
-    --use_loftq True \
-    --use_rslora True \
     --lora_r 64 \
     --lora_alpha 16 \
     --lora_modules all \
-    --double_quant \
-    --quant_type nf4 \
+    --quant_method hqq \
     --bf16 \
     --bits 4 \
     --warmup_ratio 0.03 \
     --lr_scheduler_type constant \
     --gradient_checkpointing \
-    --dataset unnatural-core \
-    --dataset_format unnatural-core \
+    --dataset alpaca \
+    --dataset_format alpaca \
     --source_max_len 384 \
     --target_max_len 128 \
     --per_device_train_batch_size 8 \

@@ -18,6 +18,7 @@ from peft import (
     prepare_model_for_kbit_training,
     LoraConfig,
     IA3Config,
+    #VeraConfig,
     get_peft_model,
     PeftModel,
     replace_lora_weights_loftq
@@ -209,6 +210,15 @@ def get_accelerate_model(args, checkpoint_dir):
                     target_modules = modules,
                     task_type = "CAUSAL_LM"
                 )
+                model = get_peft_model(model, peft_config)
+
+            elif args.peft_method == "vera":
+                print(f'adding VeRA Modules...')
+                modules = find_all_linear_names(args, model)
+                #peft_config = VeraConfig(
+                #    target_modules = modules,
+                #    r = args.vera_r
+                #)
                 model = get_peft_model(model, peft_config)
 
     ## iterates through the named modules of the model to perform type casting to the appropriate data types

@@ -1,6 +1,5 @@
 python main.py \
     --model_name_or_path mistralai/Mistral-7B-v0.3 \
-    --hf_token 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 \
     --use_auth \
     --output_dir ./output/qlora_exp/exp1a/7B/mistral-7b-alpaca-qlora-4bit \
     --report_to wandb \
@@ -11,7 +10,8 @@ python main.py \
     --save_steps 500 \
     --save_total_limit 40 \
     --evaluation_strategy steps \
-    --eval_dataset_size 0.3 \
+    --eval_dataset_size 0.2 \
+    --max_eval_samples 1000 \
     --per_device_eval_batch_size 6 \
     --dataloader_num_workers 1 \
     --group_by_length \

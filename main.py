@@ -313,7 +313,8 @@ def train():
         trainer.add_callback(callback)
 
     # Verifying the datatypes and parameter counts before training.
-    print_trainable_parameters(args, model)
+    #print_trainable_parameters(args, model)
+    model.print_trainable_parameters()
     dtypes = {}
     for _, p in model.named_parameters():
         dtype = p.dtype
