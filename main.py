@@ -129,13 +129,14 @@ class TrainingArguments(transformers.Seq2SeqTrainingArguments):
         metadata = {"help": "Quantization data type to use. Should be one of `fp4` or `nf4`."}
     )
     bits: int = field(default = 4, metadata = {"help": "How many bits to use. If quant_method is bnb, either 8 or 4 else 1,2,3,4,8"})
-    peft_method: str = field(default = "lora", metadata = {"help": "Which PEFT Method to use (lora, IA3)"})
+    peft_method: str = field(default = "lora", metadata = {"help": "Which PEFT Method to use (lora, IA3, vera)"})
     lora_r: int = field(default = 64, metadata = {"help": "Lora R dimension."})
     lora_alpha: float = field(default = 16, metadata = {"help": " Lora alpha."})
     lora_dropout: float = field(default = 0.0, metadata = {"help":"Lora dropout."})
     use_rslora: bool = field(default = False, metadata = {"help": 'When set to True, uses Rank-Stabilized LoRA which sets the adapter scaling factor to lora_alpha/math.sqrt(r), since it was proven to work better.'})
     use_dora: bool = field(default = False, metadata = {"help": 'Whether to include DoRA (Weight Decomposed Low Rank Adaptation)'})
     use_loftq: bool = field(default = False, metadata = {"help": 'Whether to initialize the LoRA Adapter weights using LoftQ initialization.'})
+    vera_r: int = field(default = 128, metadata = {"help": "VeRA R dimension."})
     max_memory_MB: int = field(default = 46000, metadata = {"help": "Free memory per gpu."})
     report_to: str = field(default = 'none', metadata = {"help": "To use wandb or something else for reporting."})
     sft: bool = field(default = False, metadata = {"help": "If True, use the SupervisedFineTuning Trainer of HF else use Seq2SeqTrainer"})
@@ -390,7 +391,7 @@ def train():
         compute_dtype = (torch.float16 if args.fp16 else (torch.bfloat16 if args.bf16 else torch.float32))
         torch.cuda.empty_cache()
 
-        if args.peft_method == "lora":
+        if args.peft_method == "lora" or args.peft_method == "IA3" or args.peft_method == "vera":
             
             if args.quant_method == "bnb":
                 print("Using BnB Config to quantize......")

@@ -1,6 +1,5 @@
 python main.py \
     --model_name_or_path meta-llama/Llama-2-7b-hf \
-    --hf_token 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 \
     --use_auth \
     --output_dir ./output/loftq_exp/exp3c/7B/llama2-7b-hhrlhf-loftq-4bit \
     --report_to wandb \
@@ -12,6 +11,7 @@ python main.py \
     --save_total_limit 40 \
     --evaluation_strategy steps \
     --eval_dataset_size 0.2 \
+    --max_eval_samples 1000 \
     --per_device_eval_batch_size 6 \
     --group_by_length \
     --dataloader_num_workers 1 \
@@ -34,7 +34,7 @@ python main.py \
     --dataset hh-rlhf \
     --dataset_format hh-rlhf \
     --target_max_len 768 \
-    --per_device_train_batch_size 8 \
+    --per_device_train_batch_size 16 \
     --gradient_accumulation_steps 16 \
     --max_steps 5000 \
     --eval_steps 500 \
