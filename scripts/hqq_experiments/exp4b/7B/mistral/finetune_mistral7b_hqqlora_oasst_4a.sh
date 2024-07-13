@@ -1,9 +1,9 @@
 python main.py \
-    --model_name_or_path meta-llama/Llama-2-7b-hf \
+    --model_name_or_path mistralai/Mistral-7B-v0.3 \
     --use_auth \
-    --output_dir ./output/hqq_exp/exp4a/7B/llama2-7b-alpaca-hqqlora-4bit \
+    --output_dir ./output/hqq_exp/exp4a/7B/mistral-7b-oasst-hqqlora-4bit \
     --report_to wandb \
-    --run_name llama2_7B_alpaca_hqqlora_4bit_1a \
+    --run_name mistral_7B_oasst_hqqlora_4bit_4a \
     --logging_steps 25 \
     --save_strategy steps \
     --data_seed 2024 \
@@ -29,14 +29,13 @@ python main.py \
     --warmup_ratio 0.03 \
     --lr_scheduler_type constant \
     --gradient_checkpointing \
-    --dataset alpaca \
-    --dataset_format alpaca \
-    --source_max_len 384 \
-    --target_max_len 128 \
+    --dataset oasst1 \
+    --dataset_format oasst1 \
+    --target_max_len 512 \
     --per_device_train_batch_size 8 \
     --gradient_accumulation_steps 16 \
-    --max_steps 5000 \
-    --eval_steps 500 \
+    --max_steps 1875 \
+    --eval_steps 187 \
     --learning_rate 0.0002 \
     --adam_beta2 0.999 \
     --max_grad_norm 0.3 \

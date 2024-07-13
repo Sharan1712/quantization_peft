@@ -18,7 +18,6 @@ from peft import (
     prepare_model_for_kbit_training,
     LoraConfig,
     IA3Config,
-    #VeraConfig,
     get_peft_model,
     PeftModel,
     replace_lora_weights_loftq
@@ -26,12 +25,16 @@ from peft import (
 from peft.tuners.lora import LoraLayer
 
 from common.utils import *
-
+import GPUtil
 DEFAULT_PAD_TOKEN = "[PAD]"
 
 # used to find and list the names of all the linear modules
 def find_all_linear_names(args, model):
-    cls = bnb.nn.Linear4bit if args.bits == 4 else (bnb.nn.Linear8bitLt if args.bits == 8 else torch.nn.Linear)
+    if args.quant_method == "hqq":
+        from hqq.core.quantize import HQQLinear
+        cls = HQQLinear
+    else:
+        cls = bnb.nn.Linear4bit if args.bits == 4 else (bnb.nn.Linear8bitLt if args.bits == 8 else torch.nn.Linear)
     lora_module_names = set()
     for name, module in model.named_modules():
         if isinstance(module, cls):
@@ -114,9 +117,10 @@ def get_accelerate_model(args, checkpoint_dir):
             bnb_4bit_use_double_quant = args.double_quant,
             bnb_4bit_quant_type = args.quant_type
             )
-    elif args.quant_method == "hhq":
+    elif args.quant_method == "hqq":
+        from transformers import HqqConfig
         print("Using HQQ Config to quantize......")
-        #quantization_config = HqqConfig(nbits = args.bits)
+        quantization_config = HqqConfig(nbits = args.bits, quant_zero=False, quant_scale=False, axis=0)
 
     model = AutoModelForCausalLM.from_pretrained(
         args.model_name_or_path,
@@ -129,6 +133,9 @@ def get_accelerate_model(args, checkpoint_dir):
         use_safetensors = True,
         token = args.hf_token
     )
+    print("GPU Space after model Loaded.......")
+    GPUtil.showUtilization(all=True)
+    print(".......")
     if compute_dtype == torch.float16 and args.bits == 4:
         if torch.cuda.is_bf16_supported():
             print('='*80)
@@ -145,7 +152,7 @@ def get_accelerate_model(args, checkpoint_dir):
 
     model.config.torch_dtype = (torch.float16 if args.fp16 else (torch.bfloat16 if args.bf16 else torch.float32))
 
-    tokenizer_type = 'llama' if 'llama' in args.model_name_or_path else None
+    tokenizer_type = 'llama' if 'llama2' in args.model_name_or_path else None
 
     # Initializing the Tokenizer
     tokenizer = AutoTokenizer.from_pretrained(
@@ -213,12 +220,13 @@ def get_accelerate_model(args, checkpoint_dir):
                 model = get_peft_model(model, peft_config)
 
             elif args.peft_method == "vera":
+                from peft import VeraConfig
                 print(f'adding VeRA Modules...')
                 modules = find_all_linear_names(args, model)
-                #peft_config = VeraConfig(
-                #    target_modules = modules,
-                #    r = args.vera_r
-                #)
+                peft_config = VeraConfig(
+                   target_modules = "all-linear",
+                   r = args.vera_r
+                )
                 model = get_peft_model(model, peft_config)
 
     ## iterates through the named modules of the model to perform type casting to the appropriate data types

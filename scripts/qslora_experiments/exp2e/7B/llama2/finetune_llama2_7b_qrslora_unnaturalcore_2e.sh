@@ -7,7 +7,7 @@ python main.py \
     --logging_steps 25 \
     --save_strategy steps \
     --data_seed 2024 \
-    --save_steps 1500 \
+    --save_steps 1000 \
     --save_total_limit 40 \
     --evaluation_strategy steps \
     --eval_dataset_size 0.2 \
@@ -37,11 +37,12 @@ python main.py \
     --target_max_len 128 \
     --per_device_train_batch_size 8 \
     --gradient_accumulation_steps 16 \
-    --max_steps 5000 \
-    --eval_steps 500 \
+    --max_steps 2500 \
+    --eval_steps 250 \
     --learning_rate 0.0002 \
     --adam_beta2 0.999 \
     --max_grad_norm 0.3 \
     --lora_dropout 0.1 \
     --weight_decay 0.001 \
     --seed 2024 \
+    --n_gpus 1 \

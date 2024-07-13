@@ -26,6 +26,7 @@ from trl import SFTTrainer
 from datasets import load_dataset
 import evaluate
 import wandb
+import GPUtil
 
 from transformers.trainer_utils import PREFIX_CHECKPOINT_DIR
 
@@ -369,6 +370,11 @@ def train():
         trainer.save_metrics("predict", prediction_metrics)
         all_metrics.update(prediction_metrics)
 
+    
+    print("GPU Space after model trained.......")
+    GPUtil.showUtilization(all=True)
+    print(".......")
+
     if args.upload_to_hub:
         print("Uploading tuned model to HF..........")
 
@@ -404,9 +410,10 @@ def train():
                     bnb_4bit_use_double_quant = args.double_quant,
                     bnb_4bit_quant_type = args.quant_type
                     )
-            elif args.quant_method == "hhq":
+            elif args.quant_method == "hqq":
+                from transformers import HqqConfig
                 print("Using HQQ Config to quantize......")
-                #quantization_config = HqqConfig(nbits = args.bits)
+                quantization_config = HqqConfig(nbits = args.bits)
 
             base_model = AutoModelForCausalLM.from_pretrained(
                 args.model_name_or_path,

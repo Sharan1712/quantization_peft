@@ -34,11 +34,12 @@ python main.py \
     --target_max_len 512 \
     --per_device_train_batch_size 8 \
     --gradient_accumulation_steps 16 \
-    --max_steps 1875 \
-    --eval_steps 187 \
+    --max_steps 1000 \
+    --eval_steps 100 \
     --learning_rate 0.0002 \
     --adam_beta2 0.999 \
     --max_grad_norm 0.3 \
     --lora_dropout 0.1 \
     --weight_decay 0.001 \
     --seed 2024 \
+    --n_gpus 1 \

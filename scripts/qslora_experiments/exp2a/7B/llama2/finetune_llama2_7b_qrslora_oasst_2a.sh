@@ -11,6 +11,7 @@ python main.py \
     --save_total_limit 40 \
     --evaluation_strategy steps \
     --eval_dataset_size 0.2 \
+    --max_eval_samples 1000 \
     --per_device_eval_batch_size 6 \
     --group_by_length \
     --dataloader_num_workers 1 \
@@ -35,8 +36,8 @@ python main.py \
     --target_max_len 512 \
     --per_device_train_batch_size 8 \
     --gradient_accumulation_steps 16 \
-    --max_steps 1875 \
-    --eval_steps 187 \
+    --max_steps 1000 \
+    --eval_steps 100 \
     --learning_rate 0.0002 \
     --adam_beta2 0.999 \
     --max_grad_norm 0.3 \
@@ -44,4 +45,3 @@ python main.py \
     --weight_decay 0.001 \
     --seed 2024 \
     --n_gpus 1 \
-    --do_hpo

@@ -43,3 +43,4 @@ python main.py \
     --lora_dropout 0.1 \
     --weight_decay 0.001 \
     --seed 2024 \
+    --n_gpus 1 \

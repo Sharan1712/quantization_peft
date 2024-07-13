@@ -1,6 +1,5 @@
 python main.py \
     --model_name_or_path meta-llama/Llama-2-7b-hf \
-    --hf_token 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 \
     --use_auth \
     --output_dir ./output/qrslora_exp/exp2c/7B/llama2-7b-oasst-qrslora-4bit \
     --report_to wandb \
@@ -12,6 +11,7 @@ python main.py \
     --save_total_limit 40 \
     --evaluation_strategy steps \
     --eval_dataset_size 0.2 \
+    --max_eval_samples 1000 \
     --per_device_eval_batch_size 6 \
     --group_by_length \
     --dataloader_num_workers 1 \
@@ -36,11 +36,12 @@ python main.py \
     --target_max_len 512 \
     --per_device_train_batch_size 8 \
     --gradient_accumulation_steps 16 \
-    --max_steps 1875 \
-    --eval_steps 187 \
+    --max_steps 1000 \
+    --eval_steps 100 \
     --learning_rate 0.0002 \
     --adam_beta2 0.999 \
     --max_grad_norm 0.3 \
     --lora_dropout 0.1 \
     --weight_decay 0.001 \
     --seed 2024 \
+    --n_gpus 1 \
