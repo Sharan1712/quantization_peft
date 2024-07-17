@@ -1,9 +1,9 @@
 python main.py \
-    --model_name_or_path meta-llama/Llama-2-7b-hf \
+    --model_name_or_path meta-llama/Meta-Llama-3-8B \
     --use_auth \
-    --output_dir ./output/loftq_exp/exp3h/7B/llama2-7b-unnatural-core-loftq-4bit \
+    --output_dir ./output/loftq_exp/exp3i/8B/llama3-8b-unnatural-core-loftq-4bit \
     --report_to wandb \
-    --run_name llama2_7B_unnaturalcore_loftq_4bit_3h \
+    --run_name llama3_8B_unnaturalcore_loftq_4bit_3i \
     --logging_steps 25 \
     --save_strategy steps \
     --data_seed 2024 \
@@ -21,8 +21,7 @@ python main.py \
     --do_eval \
     --do_mmlu_eval \
     --use_loftq True \
-    --use_rslora True \
-    --lora_r 64 \
+    --lora_r 256 \
     --lora_alpha 128 \
     --lora_modules all \
     --double_quant \
@@ -38,7 +37,7 @@ python main.py \
     --target_max_len 128 \
     --per_device_train_batch_size 8 \
     --gradient_accumulation_steps 16 \
-    --max_steps 1000 \
+    --max_steps 2500 \
     --eval_steps 250 \
     --learning_rate 0.0002 \
     --adam_beta2 0.999 \

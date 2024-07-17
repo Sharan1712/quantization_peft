@@ -34,7 +34,7 @@ python main.py \
     --dataset hh-rlhf \
     --dataset_format hh-rlhf \
     --target_max_len 768 \
-    --per_device_train_batch_size 8 \
+    --per_device_train_batch_size 16 \
     --gradient_accumulation_steps 16 \
     --max_steps 3000 \
     --eval_steps 300 \

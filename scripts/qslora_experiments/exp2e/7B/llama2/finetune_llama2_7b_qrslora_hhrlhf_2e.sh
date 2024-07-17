@@ -1,9 +1,9 @@
 python main.py \
     --model_name_or_path meta-llama/Llama-2-7b-hf \
     --use_auth \
-    --output_dir ./output/qrslora_exp/exp2d/7B/llama2-7b-hhrlhf-qrslora-4bit \
+    --output_dir ./output/qrslora_exp/exp2e/7B/llama2-7b-hhrlhf-qrslora-4bit \
     --report_to wandb \
-    --run_name llama2_7B_hhrlhf_qrslora_4bit_2d \
+    --run_name llama2_7B_hhrlhf_qrslora_4bit_2e \
     --logging_steps 25 \
     --save_strategy steps \
     --data_seed 2024 \

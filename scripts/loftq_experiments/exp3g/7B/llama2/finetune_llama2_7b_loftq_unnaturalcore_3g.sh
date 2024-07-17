@@ -37,7 +37,7 @@ python main.py \
     --target_max_len 128 \
     --per_device_train_batch_size 8 \
     --gradient_accumulation_steps 16 \
-    --max_steps 2500 \
+    --max_steps 1000 \
     --eval_steps 250 \
     --learning_rate 0.0002 \
     --adam_beta2 0.999 \

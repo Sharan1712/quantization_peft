@@ -32,7 +32,7 @@ python main.py \
     --dataset oasst1 \
     --dataset_format oasst1 \
     --target_max_len 512 \
-    --per_device_train_batch_size 8 \
+    --per_device_train_batch_size 16 \
     --gradient_accumulation_steps 16 \
     --max_steps 1000 \
     --eval_steps 100 \
@@ -42,3 +42,4 @@ python main.py \
     --lora_dropout 0.1 \
     --weight_decay 0.001 \
     --seed 2024 \
+    --n_gpus 1 \

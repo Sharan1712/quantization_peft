@@ -2,6 +2,7 @@ python main.py \
     --model_name_or_path meta-llama/Llama-2-7b-hf \
     --use_auth \
     --output_dir ./output/hqq_exp/exp4b/7B/llama2-7b-oasst-hqqlora-4bit \
+    --cache_dir ./cache/ \
     --report_to wandb \
     --run_name llama2_7B_oasst_hqqlora_4bit_4b \
     --logging_steps 25 \
@@ -42,3 +43,4 @@ python main.py \
     --lora_dropout 0.1 \
     --weight_decay 0.001 \
     --seed 2024 \
+    --n_gpus 1 \
