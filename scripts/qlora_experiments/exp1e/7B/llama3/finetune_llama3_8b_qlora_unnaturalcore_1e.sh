@@ -1,6 +1,7 @@
 python main.py \
     --model_name_or_path meta-llama/Meta-Llama-3-8B \
     --use_auth \
+    --cache_dir ./cache \
     --output_dir ./output/qlora_exp/exp1e/8B/llama3-8b-unnatural-core-qlora-4bit \
     --report_to wandb \
     --run_name llama3_8B_unnaturalcore_qlora_4bit_1e \
@@ -36,11 +37,12 @@ python main.py \
     --target_max_len 128 \
     --per_device_train_batch_size 16 \
     --gradient_accumulation_steps 16 \
-    --max_steps 3500 \
-    --eval_steps 350 \
+    --max_steps 3000 \
+    --eval_steps 300 \
     --learning_rate 0.0002 \
     --adam_beta2 0.999 \
     --max_grad_norm 0.3 \
     --lora_dropout 0.1 \
     --weight_decay 0.001 \
     --seed 2024 \
+    --n_gpus 1 \

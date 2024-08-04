@@ -86,6 +86,12 @@ def get_accelerate_model(args, checkpoint_dir):
         n_gpus = args.n_gpus ##no. of gpus to use for training
     if is_ipex_available() and torch.xpu.is_available():
         n_gpus = torch.xpu.device_count()
+
+    print("GPU Space before model Loaded.......")
+    GPUtil.showUtilization(all=True)
+    print(".......")
+
+    print(f"GPU used {torch.cuda.max_memory_allocated(device=None)} memory")
     
     ## sets the maximum memory that can be used per device and automatically determines a device mapping for model parts
     max_memory = f'{args.max_memory_MB}MB'
@@ -133,9 +139,21 @@ def get_accelerate_model(args, checkpoint_dir):
         use_safetensors = True,
         token = args.hf_token
     )
+    
+    param_size = 0
+    for param in model.parameters():
+        param_size += param.nelement() * param.element_size()
+    buffer_size = 0
+    for buffer in model.buffers():
+        buffer_size += buffer.nelement() * buffer.element_size()
+
+    size_all_mb = (param_size + buffer_size) / 1024**2
+    print('model size: {:.3f}MB'.format(size_all_mb))
+
     print("GPU Space after model Loaded.......")
     GPUtil.showUtilization(all=True)
     print(".......")
+    
     if compute_dtype == torch.float16 and args.bits == 4:
         if torch.cuda.is_bf16_supported():
             print('='*80)
@@ -192,8 +210,10 @@ def get_accelerate_model(args, checkpoint_dir):
             print("Loading adapters from checkpoint.")
             model = PeftModel.from_pretrained(model, join(checkpoint_dir, 'adapter_model'), is_trainable = True)
         else:
-            if args.peft_method == "lora":
-                print(f'adding LoRA modules...')
+            if args.use_dora:
+                print(f'adding DoRA modules...')
+                from peft import LoraRuntimeConfig
+                runtime_config = LoraRuntimeConfig(ephemeral_gpu_offload = True)
                 modules = find_all_linear_names(args, model)
                 peft_config = LoraConfig(
                     r = args.lora_r,
@@ -203,31 +223,51 @@ def get_accelerate_model(args, checkpoint_dir):
                     bias = "none",
                     task_type = "CAUSAL_LM",
                     use_rslora = args.use_rslora,
-                    use_dora = args.use_dora
+                    use_dora = args.use_dora, 
+                    runtime_config = runtime_config                   
                 )
                 model = get_peft_model(model, peft_config)
                 if args.use_loftq:
                     print(f'Using LoftQ Initialization.....')
                     replace_lora_weights_loftq(model)
+            else:       
+                if args.peft_method == "lora":
+                    print(f'adding LoRA modules...')
+                
+                    modules = find_all_linear_names(args, model)
+                    peft_config = LoraConfig(
+                        r = args.lora_r,
+                        lora_alpha = args.lora_alpha,
+                        target_modules = modules,
+                        lora_dropout = args.lora_dropout,
+                        bias = "none",
+                        task_type = "CAUSAL_LM",
+                        use_rslora = args.use_rslora,                    
+                    )
+                    model = get_peft_model(model, peft_config)
+                    if args.use_loftq:
+                        print(f'Using LoftQ Initialization.....')
+                        replace_lora_weights_loftq(model)
+                
             
-            elif args.peft_method == "IA3":
-                print(f'adding IA3 Modules...')
-                modules = find_all_linear_names(args, model)
-                peft_config = IA3Config(
-                    target_modules = modules,
-                    task_type = "CAUSAL_LM"
-                )
-                model = get_peft_model(model, peft_config)
+                elif args.peft_method == "IA3":
+                    print(f'adding IA3 Modules...')
+                    modules = find_all_linear_names(args, model)
+                    peft_config = IA3Config(
+                        target_modules = modules,
+                        task_type = "CAUSAL_LM"
+                    )
+                    model = get_peft_model(model, peft_config)
 
-            elif args.peft_method == "vera":
-                from peft import VeraConfig
-                print(f'adding VeRA Modules...')
-                modules = find_all_linear_names(args, model)
-                peft_config = VeraConfig(
-                   target_modules = "all-linear",
-                   r = args.vera_r
-                )
-                model = get_peft_model(model, peft_config)
+                elif args.peft_method == "vera":
+                    from peft import VeraConfig
+                    print(f'adding VeRA Modules...')
+                    modules = find_all_linear_names(args, model)
+                    peft_config = VeraConfig(
+                    target_modules = "all-linear",
+                    r = args.vera_r
+                    )
+                    model = get_peft_model(model, peft_config)
 
     ## iterates through the named modules of the model to perform type casting to the appropriate data types
     for name, module in model.named_modules():
@@ -240,6 +280,19 @@ def get_accelerate_model(args, checkpoint_dir):
             if hasattr(module, 'weight'):
                 if args.bf16 and module.weight.dtype == torch.float32:
                     module = module.to(torch.bfloat16)
+    
+    print(f"GPU used {torch.cuda.max_memory_allocated(device=None)} memory")
+
+    param_size = 0
+    for param in model.parameters():
+        param_size += param.nelement() * param.element_size()
+    buffer_size = 0
+    for buffer in model.buffers():
+        buffer_size += buffer.nelement() * buffer.element_size()
+
+    size_all_mb = (param_size + buffer_size) / 1024**2
+    print('model size: {:.3f}MB'.format(size_all_mb))
+
     return model, tokenizer, peft_config
 
 def print_trainable_parameters(args, model):

@@ -51,7 +51,7 @@ class ModelArguments:
         metadata = {"help": "Enable unpickling of arbitrary code in AutoModelForCausalLM#from_pretrained."}
     )
     hf_token: Optional[str] = field(
-        default = "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",
+        default = "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",
         metadata = {"help": "Enables using Huggingface auth token from Git Credentials."}
     )
 
@@ -375,6 +375,8 @@ def train():
     GPUtil.showUtilization(all=True)
     print(".......")
 
+    print(f"\nGPU used {torch.cuda.max_memory_allocated(device=None)} memory")
+
     if args.upload_to_hub:
         print("Uploading tuned model to HF..........")
 
@@ -440,6 +442,17 @@ def train():
 
         print("Merging Base model + Adapter")
         model_to_push = PeftModel.from_pretrained(base_model, new_model)
+
+        param_size = 0
+        for param in model_to_push.parameters():
+            param_size += param.nelement() * param.element_size()
+        buffer_size = 0
+        for buffer in model_to_push.buffers():
+            buffer_size += buffer.nelement() * buffer.element_size()
+
+        size_all_mb = (param_size + buffer_size) / 1024**2
+        print('model size: {:.3f}MB'.format(size_all_mb))
+
         model_to_push = model_to_push.merge_and_unload()
         
         model_to_push.push_to_hub(f"Sharan1712/{new_model}")

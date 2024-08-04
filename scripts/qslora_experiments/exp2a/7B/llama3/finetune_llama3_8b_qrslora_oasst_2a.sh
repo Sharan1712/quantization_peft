@@ -1,9 +1,10 @@
 python main.py \
-    --model_name_or_path meta-llama/Llama-2-7b-hf \
+    --model_name_or_path meta-llama/Meta-Llama-3-8B \
     --use_auth \
-    --output_dir ./output/qdora_exp/exp5b/7B/llama2-7b-oasst-qlora-4bit \
+    --cache_dir ./cache \
+    --output_dir ./output/qrslora_exp/exp2a/8B/llama3-8b-oasst-qrslora-4bit \
     --report_to wandb \
-    --run_name llama2_7B_oasst_qdora_4bit_5b \
+    --run_name llama3_8B_oasst_qrslora_4bit_2a \
     --logging_steps 25 \
     --save_strategy steps \
     --data_seed 2024 \
@@ -22,9 +23,8 @@ python main.py \
     --do_mmlu_eval \
     --lora_r 64 \
     --lora_alpha 16 \
-    --lora_modules all \
-    --use_dora True \
     --use_rslora True \
+    --lora_modules all \
     --double_quant \
     --quant_type nf4 \
     --bf16 \
@@ -35,7 +35,7 @@ python main.py \
     --dataset oasst1 \
     --dataset_format oasst1 \
     --target_max_len 512 \
-    --per_device_train_batch_size 16 \
+    --per_device_train_batch_size 8 \
     --gradient_accumulation_steps 16 \
     --max_steps 1000 \
     --eval_steps 100 \

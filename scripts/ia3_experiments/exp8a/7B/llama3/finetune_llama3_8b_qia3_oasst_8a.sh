@@ -1,9 +1,10 @@
 python main.py \
-    --model_name_or_path meta-llama/Llama-2-7b-hf \
+    --model_name_or_path meta-llama/Meta-Llama-3-8B \
     --use_auth \
-    --output_dir ./output/qdora_exp/exp5b/7B/llama2-7b-oasst-qlora-4bit \
+    --cache_dir ./cache \
+    --output_dir ./output/qia3_exp/exp8a/8B/llama3-8b-oasst-qia3-4bit \
     --report_to wandb \
-    --run_name llama2_7B_oasst_qdora_4bit_5b \
+    --run_name llama3_8B_oasst_qia3_4bit_8a \
     --logging_steps 25 \
     --save_strategy steps \
     --data_seed 2024 \
@@ -20,11 +21,7 @@ python main.py \
     --do_train \
     --do_eval \
     --do_mmlu_eval \
-    --lora_r 64 \
-    --lora_alpha 16 \
-    --lora_modules all \
-    --use_dora True \
-    --use_rslora True \
+    --peft_method IA3 \
     --double_quant \
     --quant_type nf4 \
     --bf16 \
@@ -35,14 +32,13 @@ python main.py \
     --dataset oasst1 \
     --dataset_format oasst1 \
     --target_max_len 512 \
-    --per_device_train_batch_size 16 \
+    --per_device_train_batch_size 8 \
     --gradient_accumulation_steps 16 \
     --max_steps 1000 \
     --eval_steps 100 \
     --learning_rate 0.0002 \
     --adam_beta2 0.999 \
     --max_grad_norm 0.3 \
-    --lora_dropout 0.1 \
     --weight_decay 0.001 \
     --seed 2024 \
     --n_gpus 1 \

@@ -1,6 +1,7 @@
 python main.py \
     --model_name_or_path meta-llama/Meta-Llama-3-8B \
     --use_auth \
+    --cache_dir ./cache \
     --output_dir ./output/qlora_exp/exp1a/8B/llama3-8b-unnatural-core-qlora-4bit \
     --report_to wandb \
     --run_name llama3_8B_unnaturalcore_qlora_4bit_1a \
@@ -45,4 +46,3 @@ python main.py \
     --weight_decay 0.001 \
     --seed 2024 \
     --n_gpus 1 \
-    --cache_dir ./cache \
