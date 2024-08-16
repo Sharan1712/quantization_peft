@@ -419,6 +419,7 @@ def train():
 
             base_model = AutoModelForCausalLM.from_pretrained(
                 args.model_name_or_path,
+                cache_dir = args.cache_dir,
                 low_cpu_mem_usage = True,
                 device_map = device_map,
                 quantization_config = quantization_config,
@@ -431,6 +432,7 @@ def train():
         else:
             base_model = AutoModelForCausalLM.from_pretrained(
                 args.model_name_or_path,
+                cache_dir = args.cache_dir,
                 low_cpu_mem_usage = True,
                 device_map = device_map,
                 max_memory = max_memory,

@@ -1,6 +1,7 @@
 python main.py \
     --model_name_or_path meta-llama/Llama-2-7b-hf \
     --use_auth \
+    --cache_dir ./cache \
     --output_dir ./output/qia3_exp/exp8a/7B/llama2-7b-oasst-qia3-4bit \
     --report_to wandb \
     --run_name llama2_7B_oasst_qia3_4bit_8a \
@@ -31,7 +32,7 @@ python main.py \
     --dataset oasst1 \
     --dataset_format oasst1 \
     --target_max_len 512 \
-    --per_device_train_batch_size 8 \
+    --per_device_train_batch_size 4 \
     --gradient_accumulation_steps 16 \
     --max_steps 1000 \
     --eval_steps 100 \

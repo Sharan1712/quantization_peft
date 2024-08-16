@@ -1,6 +1,7 @@
 python main.py \
     --model_name_or_path meta-llama/Llama-2-7b-hf \
     --use_auth \
+    --cache_dir ./cache \
     --output_dir ./output/hqq_exp/exp4a/7B/llama2-7b-unnatural-core-hqqqlora-4bit \
     --report_to wandb \
     --run_name llama2_7B_unnaturalcore_hqqlora_4bit_4a \
@@ -33,10 +34,10 @@ python main.py \
     --dataset_format unnatural-core \
     --source_max_len 384 \
     --target_max_len 128 \
-    --per_device_train_batch_size 8 \
+    --per_device_train_batch_size 4 \
     --gradient_accumulation_steps 16 \
-    --max_steps 3500 \
-    --eval_steps 350 \
+    --max_steps 3000 \
+    --eval_steps 300 \
     --learning_rate 0.0002 \
     --adam_beta2 0.999 \
     --max_grad_norm 0.3 \

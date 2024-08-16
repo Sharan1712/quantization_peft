@@ -1,10 +1,10 @@
 python main.py \
-    --model_name_or_path meta-llama/Meta-Llama-3-8B \
-    --hf_token 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 \
+    --model_name_or_path meta-llama/Llama-2-7b-hf \
     --use_auth \
-    --output_dir ./output/qdora_exp/exp5a/8B/llama3-8b-self-instruct-qdora-4bit \
+    --cache_dir ./cache \
+    --output_dir ./output/hqq_exp/exp4a/7B/llama2-7b-oasst-hqqlora-2bit \
     --report_to wandb \
-    --run_name llama3_8B_selfinstruct_qdora_4bit_5a \
+    --run_name llama2_7B_oasst_hqqlora_2bit_4a \
     --logging_steps 25 \
     --save_strategy steps \
     --data_seed 2024 \
@@ -12,9 +12,10 @@ python main.py \
     --save_total_limit 40 \
     --evaluation_strategy steps \
     --eval_dataset_size 0.2 \
+    --max_eval_samples 1000 \
     --per_device_eval_batch_size 6 \
-    --dataloader_num_workers 1 \
     --group_by_length \
+    --dataloader_num_workers 1 \
     --logging_strategy steps \
     --remove_unused_columns False \
     --do_train \
@@ -23,25 +24,23 @@ python main.py \
     --lora_r 64 \
     --lora_alpha 16 \
     --lora_modules all \
-    --use_dora True \
-    --double_quant \
-    --quant_type nf4 \
+    --quant_method hqq \
     --bf16 \
-    --bits 4 \
+    --bits 2 \
     --warmup_ratio 0.03 \
     --lr_scheduler_type constant \
     --gradient_checkpointing \
-    --dataset self-instruct \
-    --dataset_format self-instruct \
-    --source_max_len 384 \
-    --target_max_len 128 \
-    --per_device_train_batch_size 4 \
+    --dataset oasst1 \
+    --dataset_format oasst1 \
+    --target_max_len 512 \
+    --per_device_train_batch_size 8 \
     --gradient_accumulation_steps 16 \
-    --max_steps 5000 \
-    --eval_steps 500 \
+    --max_steps 1000 \
+    --eval_steps 100 \
     --learning_rate 0.0002 \
     --adam_beta2 0.999 \
     --max_grad_norm 0.3 \
     --lora_dropout 0.1 \
     --weight_decay 0.001 \
     --seed 2024 \
+    --n_gpus 1 \
