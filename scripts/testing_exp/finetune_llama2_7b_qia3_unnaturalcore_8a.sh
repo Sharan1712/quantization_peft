@@ -1,5 +1,6 @@
 python main.py \
     --model_name_or_path meta-llama/Llama-2-7b-hf \
+    --cache_dir ./cache \
     --use_auth \
     --output_dir ./output/test/qia3_exp/exp8a/7B/llama2-7b-unnatural-core-qia3-4bit \
     --report_to wandb \
