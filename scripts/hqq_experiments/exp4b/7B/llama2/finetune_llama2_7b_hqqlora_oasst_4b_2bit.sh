@@ -1,10 +1,10 @@
 python main.py \
-    --model_name_or_path meta-llama/Llama-2-70b-hf \
-    --cache_dir ./cache \
+    --model_name_or_path meta-llama/Llama-2-7b-hf \
     --use_auth \
-    --output_dir ./output/qlora_exp/exp1b/7B/llama2-70b-oasst-qlora-4bit \
+    --output_dir ./output/hqq_exp/exp4b/7B/llama2-7b-oasst-hqqlora-2bit \
+    --cache_dir ./cache/ \
     --report_to wandb \
-    --run_name llama2_70B_oasst_qlora_4bit_1b \
+    --run_name llama2_7B_oasst_hqqlora_2bit_4b \
     --logging_steps 25 \
     --save_strategy steps \
     --data_seed 2024 \
@@ -24,10 +24,9 @@ python main.py \
     --lora_r 8 \
     --lora_alpha 16 \
     --lora_modules all \
-    --double_quant \
-    --quant_type nf4 \
+    --quant_method hqq \
     --bf16 \
-    --bits 4 \
+    --bits 2 \
     --warmup_ratio 0.03 \
     --lr_scheduler_type constant \
     --gradient_checkpointing \

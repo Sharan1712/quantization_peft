@@ -1,6 +1,7 @@
 python main.py \
     --model_name_or_path meta-llama/Llama-2-7b-hf \
     --use_auth \
+    --cache_dir ./cache \
     --output_dir ./output/qdora_exp/exp5h/7B/llama2-7b-oasst-qlora-4bit \
     --report_to wandb \
     --run_name llama2_7B_oasst_qdora_4bit_5h \

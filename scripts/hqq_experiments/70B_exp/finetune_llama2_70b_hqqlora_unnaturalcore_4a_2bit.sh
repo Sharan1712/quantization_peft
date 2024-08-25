@@ -1,10 +1,10 @@
 python main.py \
-    --model_name_or_path meta-llama/Llama-2-7b-hf \
+    --model_name_or_path meta-llama/Llama-2-70b-hf \
     --use_auth \
     --cache_dir ./cache \
-    --output_dir ./output/qdora_exp/exp5g/7B/llama2-7b-unnatural-core-qdora-4bit \
+    --output_dir ./output/hqq_exp/exp4a/70B/llama2-70b-unnatural-core-hqqqlora-2bit \
     --report_to wandb \
-    --run_name llama2_7B_unnaturalcore_qdora_4bit_5g \
+    --run_name llama2_70B_unnaturalcore_hqqlora_2bit_4a \
     --logging_steps 25 \
     --save_strategy steps \
     --data_seed 2024 \
@@ -21,14 +21,12 @@ python main.py \
     --do_train \
     --do_eval \
     --do_mmlu_eval \
-    --lora_r 256 \
-    --lora_alpha 128 \
+    --lora_r 64 \
+    --lora_alpha 16 \
     --lora_modules all \
-    --use_dora True \
-    --double_quant \
-    --quant_type nf4 \
+    --quant_method hqq \
     --bf16 \
-    --bits 4 \
+    --bits 2 \
     --warmup_ratio 0.03 \
     --lr_scheduler_type constant \
     --gradient_checkpointing \
@@ -38,8 +36,8 @@ python main.py \
     --target_max_len 128 \
     --per_device_train_batch_size 4 \
     --gradient_accumulation_steps 16 \
-    --max_steps 3000 \
-    --eval_steps 300 \
+    --max_steps 2000 \
+    --eval_steps 500 \
     --learning_rate 0.0002 \
     --adam_beta2 0.999 \
     --max_grad_norm 0.3 \

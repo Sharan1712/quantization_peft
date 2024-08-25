@@ -35,7 +35,7 @@ python main.py \
     --dataset oasst1 \
     --dataset_format oasst1 \
     --target_max_len 512 \
-    --per_device_train_batch_size 8 \
+    --per_device_train_batch_size 4 \
     --gradient_accumulation_steps 16 \
     --max_steps 1000 \
     --eval_steps 100 \
