@@ -1,9 +1,9 @@
 python main.py \
     --model_name_or_path meta-llama/Llama-2-7b-hf \
     --use_auth \
-    --output_dir ./output/qdora_exp/exp6a/7B/llama2-7b-hhrlhf-loftqDora-4bit \
+    --output_dir ./output/qdora_exp/exp6c/7B/llama2-7b-hhrlhf-loftqDora-4bit \
     --report_to wandb \
-    --run_name llama2_7B_hhrlhf_qdora_loftq_4bit_6a \
+    --run_name llama2_7B_hhrlhf_qdora_loftq_4bit_6c \
     --logging_steps 25 \
     --save_strategy steps \
     --data_seed 2024 \
@@ -21,7 +21,7 @@ python main.py \
     --do_eval \
     --do_mmlu_eval \
     --lora_r 64 \
-    --lora_alpha 16 \
+    --lora_alpha 128 \
     --lora_modules all \
     --use_dora True \
     --use_loftq True \
