@@ -44,14 +44,14 @@ os.environ["WANDB_LOG_MODEL"] = "true"
 @dataclass
 class ModelArguments:
     model_name_or_path: Optional[str] = field(
-        default = "mistralai/Mistral-7B-Instruct-v0.2"
+        default = "meta-llama/Llama-2-7b-hf"
     )
     trust_remote_code: Optional[bool] = field(
         default = False,
         metadata = {"help": "Enable unpickling of arbitrary code in AutoModelForCausalLM#from_pretrained."}
     )
     hf_token: Optional[str] = field(
-        default = "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",
+        default = "ADD_YOUR_TOKEN_HERE",
         metadata = {"help": "Enables using Huggingface auth token from Git Credentials."}
     )
 
@@ -227,24 +227,24 @@ def train():
             args = training_args,
             **{k:v for k,v in data_module.items() if k != 'predict_dataset'},
         )
-    else:
-        print("Using SFTTrainer......") ## Not working yet. Need to fix errors
-        def format_instruction(sample):
-            return f"""
-            {sample['input']}
+    # else:
+    #     print("Using SFTTrainer......") ## Not working yet. Need to fix errors
+    #     def format_instruction(sample):
+    #         return f"""
+    #         {sample['input']}
 
-            {sample['output']}
-            """
-        trainer = SFTTrainer(
-            model = model,
-            tokenizer = tokenizer,
-            **{k:v for k,v in data_module.items() if k != 'predict_dataset'},
-            peft_config = peft_config,
-            max_seq_length = args.source_max_len,
-            packing = True,
-            formatting_func = format_instruction,
-            args = training_args
-        )
+    #         {sample['output']}
+    #         """
+    #     trainer = SFTTrainer(
+    #         model = model,
+    #         tokenizer = tokenizer,
+    #         **{k:v for k,v in data_module.items() if k != 'predict_dataset'},
+    #         peft_config = peft_config,
+    #         max_seq_length = args.source_max_len,
+    #         packing = True,
+    #         formatting_func = format_instruction,
+    #         args = training_args
+    #     )
 
     # Callbacks
     if not args.full_finetune:
