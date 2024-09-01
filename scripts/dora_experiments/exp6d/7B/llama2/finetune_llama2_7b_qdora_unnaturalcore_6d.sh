@@ -1,9 +1,9 @@
 python main.py \
     --model_name_or_path meta-llama/Llama-2-7b-hf \
     --use_auth \
-    --output_dir ./output/qdora_exp/exp6c/7B/llama2-7b-hhrlhf-loftqDora-4bit \
+    --output_dir ./output/qdora_exp/exp6d/7B/llama2-7b-unnatural-core-loftqDora-4bit \
     --report_to wandb \
-    --run_name llama2_7B_hhrlhf_qdora_loftq_4bit_6c \
+    --run_name llama2_7B_unnaturalcore_qdora_loftq_4bit_6d \
     --logging_steps 25 \
     --save_strategy steps \
     --data_seed 2024 \
@@ -13,14 +13,14 @@ python main.py \
     --eval_dataset_size 0.2 \
     --max_eval_samples 1000 \
     --per_device_eval_batch_size 6 \
-    --group_by_length \
     --dataloader_num_workers 1 \
+    --group_by_length \
     --logging_strategy steps \
     --remove_unused_columns False \
     --do_train \
     --do_eval \
     --do_mmlu_eval \
-    --lora_r 64 \
+    --lora_r 256 \
     --lora_alpha 128 \
     --lora_modules all \
     --use_dora True \
@@ -32,10 +32,11 @@ python main.py \
     --warmup_ratio 0.03 \
     --lr_scheduler_type constant \
     --gradient_checkpointing \
-    --dataset hh-rlhf \
-    --dataset_format hh-rlhf \
-    --target_max_len 768 \
-    --per_device_train_batch_size 16 \
+    --dataset unnatural-core \
+    --dataset_format unnatural-core \
+    --source_max_len 384 \
+    --target_max_len 128 \
+    --per_device_train_batch_size 4 \
     --gradient_accumulation_steps 16 \
     --max_steps 3000 \
     --eval_steps 300 \

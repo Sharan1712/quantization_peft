@@ -1,8 +1,9 @@
 lm_eval --model hf \
-    --model_args pretrained=Sharan1712/llama2_7B_unnaturalcore_qrslora_4bit_2b \
-    --tasks hellaswag,gsm8k,mmlu,glue,truthfulqa,winogrande,squadv2 \
-    --device cuda:0 \
+    --model_args pretrained=meta-llama/Llama-2-70b-hf,parallelize=True,load_in_4bit=True \
+    --use_cache ./cache \
+    --tasks mmlu \
+    --device cuda:3 \
     --batch_size 8 \
-    --output_path output/eval_results/exp2b/llama2_unnatural \
-    --wandb_args project=lm-eval-harness-integration,name=llama2_7b_unnatural_2b \
+    --output_path output/eval_results/70B/llama2_70B \
+    --wandb_args project=lm-eval-harness-integration,name=llama2_70b \
     --log_samples

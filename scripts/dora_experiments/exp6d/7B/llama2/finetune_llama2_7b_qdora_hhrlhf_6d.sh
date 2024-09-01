@@ -1,9 +1,9 @@
 python main.py \
     --model_name_or_path meta-llama/Llama-2-7b-hf \
     --use_auth \
-    --output_dir ./output/qdora_exp/exp6c/7B/llama2-7b-hhrlhf-loftqDora-4bit \
+    --output_dir ./output/qdora_exp/exp6d/7B/llama2-7b-hhrlhf-loftqDora-4bit \
     --report_to wandb \
-    --run_name llama2_7B_hhrlhf_qdora_loftq_4bit_6c \
+    --run_name llama2_7B_hhrlhf_qdora_loftq_4bit_6d \
     --logging_steps 25 \
     --save_strategy steps \
     --data_seed 2024 \
@@ -20,7 +20,7 @@ python main.py \
     --do_train \
     --do_eval \
     --do_mmlu_eval \
-    --lora_r 64 \
+    --lora_r 256 \
     --lora_alpha 128 \
     --lora_modules all \
     --use_dora True \
@@ -35,7 +35,7 @@ python main.py \
     --dataset hh-rlhf \
     --dataset_format hh-rlhf \
     --target_max_len 768 \
-    --per_device_train_batch_size 16 \
+    --per_device_train_batch_size 8 \
     --gradient_accumulation_steps 16 \
     --max_steps 3000 \
     --eval_steps 300 \
