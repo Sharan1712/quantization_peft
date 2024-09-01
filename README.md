@@ -22,6 +22,7 @@ This repository presents implementation of my Master Thesis. This thesis explore
 1. Create a python virtual environment with version 3.11 and install the prerequisite packages.
 ```
 conda create -n thesis311 python=3.11
+conda activate thesis311
 pip install -r requirements.txt
 ```
 2. Additional Requirments - Huggingface account, permissions to models you want to access. 
