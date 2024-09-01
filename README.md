@@ -1,5 +1,5 @@
 # A Study of PEFT Methods applied to Quantized Large Language Models
-This repository presents implementation of my Master Thesis. This thesis seeks to optimize LLMs by applying PEFT to quantized models, aiming to replicate QLoRA’s success and assess its effectiveness and performance impact across different strategies and LLMs. The motivation behind these experiments is rooted from the the growing need for efficient tuning and deployment of LLMs in resource-constrained environments. It aims to fill the gap in research of combined application by conducting a detailed study on the application of PEFT methods to quantized LLMs.
+This repository presents implementation of my Master Thesis. This thesis explores the integration of Quantization and Parameter-Efficient Fine-Tuning (PEFT) methods in optimizing Large Language Models (LLMs). While Quantization and PEFT have independently advanced the efficiency of LLMs, their combined application remains underexplored. This thesis seeks to optimize LLMs through applying PEFT methods to quantized models, aiming to replicate QLoRA’s (Dettmers et al. 2024) success and assess its effectiveness and performance impact across different PEFT strategies and LLMs. The experiments examine various combinations of these techniques, focusing on their impact on model performance, memory efficiency, and computational overhead. Using the LLaMa series as the base models, experiments were conducted across diverse Natural Language Generation tasks to assess these combinations. The results reveal that certain Quantization and PEFT pairings offer substantial improvements in efficiency without significant loss of performance, highlighting the potential for these methods to enable more practical deployment of large models in resource-constrained environments.
 
 ### Project Organization
 ------------
@@ -21,6 +21,7 @@ This repository presents implementation of my Master Thesis. This thesis seeks t
 ### Guidelines
 1. Create a python virtual environment with version 3.11 and install the prerequisite packages.
 ```
+conda create -n thesis311 python=3.11
 pip install -r requirements.txt
 ```
 2. Additional Requirments - Huggingface account, permissions to models you want to access. 
