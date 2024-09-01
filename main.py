@@ -26,6 +26,7 @@ from trl import SFTTrainer
 from datasets import load_dataset
 import evaluate
 import wandb
+import GPUtil
 
 from transformers.trainer_utils import PREFIX_CHECKPOINT_DIR
 
@@ -50,7 +51,7 @@ class ModelArguments:
         metadata = {"help": "Enable unpickling of arbitrary code in AutoModelForCausalLM#from_pretrained."}
     )
     hf_token: Optional[str] = field(
-        default = "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",
+        default = "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",
         metadata = {"help": "Enables using Huggingface auth token from Git Credentials."}
     )
 
@@ -123,20 +124,20 @@ class TrainingArguments(transformers.Seq2SeqTrainingArguments):
         default = True,
         metadata = {"help": "Compress the quantization statistics through double quantization."}
     )
-    quant_method: str = field(default = "bnb", metadata = {"help": "Quantization method to use. Should be one of `bnb` or `quanto`."})
+    quant_method: str = field(default = "bnb", metadata = {"help": "Quantization method to use. Should be one of `bnb` or `hqq`."})
     quant_type: str = field(
         default = "nf4",
         metadata = {"help": "Quantization data type to use. Should be one of `fp4` or `nf4`."}
     )
-    bits: int = field(default = 4, metadata = {"help": "How many bits to use."})
-    quanto_weight_bits: str = field(default = "int4", metadata = {"help": "How many bits to use. (float8, int8, int4, int2)"})
-    peft_method: str = field(default = "lora", metadata = {"help": "Which PEFT Method to use (lora, IA3)"})
+    bits: int = field(default = 4, metadata = {"help": "How many bits to use. If quant_method is bnb, either 8 or 4 else 1,2,3,4,8"})
+    peft_method: str = field(default = "lora", metadata = {"help": "Which PEFT Method to use (lora, IA3, vera)"})
     lora_r: int = field(default = 64, metadata = {"help": "Lora R dimension."})
     lora_alpha: float = field(default = 16, metadata = {"help": " Lora alpha."})
     lora_dropout: float = field(default = 0.0, metadata = {"help":"Lora dropout."})
     use_rslora: bool = field(default = False, metadata = {"help": 'When set to True, uses Rank-Stabilized LoRA which sets the adapter scaling factor to lora_alpha/math.sqrt(r), since it was proven to work better.'})
     use_dora: bool = field(default = False, metadata = {"help": 'Whether to include DoRA (Weight Decomposed Low Rank Adaptation)'})
     use_loftq: bool = field(default = False, metadata = {"help": 'Whether to initialize the LoRA Adapter weights using LoftQ initialization.'})
+    vera_r: int = field(default = 128, metadata = {"help": "VeRA R dimension."})
     max_memory_MB: int = field(default = 46000, metadata = {"help": "Free memory per gpu."})
     report_to: str = field(default = 'none', metadata = {"help": "To use wandb or something else for reporting."})
     sft: bool = field(default = False, metadata = {"help": "If True, use the SupervisedFineTuning Trainer of HF else use Seq2SeqTrainer"})
@@ -314,7 +315,8 @@ def train():
         trainer.add_callback(callback)
 
     # Verifying the datatypes and parameter counts before training.
-    print_trainable_parameters(args, model)
+    #print_trainable_parameters(args, model)
+    model.print_trainable_parameters()
     dtypes = {}
     for _, p in model.named_parameters():
         dtype = p.dtype
@@ -368,6 +370,13 @@ def train():
         trainer.save_metrics("predict", prediction_metrics)
         all_metrics.update(prediction_metrics)
 
+    
+    print("GPU Space after model trained.......")
+    GPUtil.showUtilization(all=True)
+    print(".......")
+
+    print(f"\nGPU used {torch.cuda.max_memory_allocated(device=None)} memory")
+
     if args.upload_to_hub:
         print("Uploading tuned model to HF..........")
 
@@ -390,7 +399,7 @@ def train():
         compute_dtype = (torch.float16 if args.fp16 else (torch.bfloat16 if args.bf16 else torch.float32))
         torch.cuda.empty_cache()
 
-        if args.peft_method == "lora":
+        if args.peft_method == "lora" or args.peft_method == "IA3" or args.peft_method == "vera":
             
             if args.quant_method == "bnb":
                 print("Using BnB Config to quantize......")
@@ -403,12 +412,14 @@ def train():
                     bnb_4bit_use_double_quant = args.double_quant,
                     bnb_4bit_quant_type = args.quant_type
                     )
-            elif args.quant_method == "quanto":
-                print("Using Quanto Config to quantize......")
-                quantization_config = QuantoConfig(weights = args.quanto_weight_bits)
+            elif args.quant_method == "hqq":
+                from transformers import HqqConfig
+                print("Using HQQ Config to quantize......")
+                quantization_config = HqqConfig(nbits = args.bits)
 
             base_model = AutoModelForCausalLM.from_pretrained(
                 args.model_name_or_path,
+                cache_dir = args.cache_dir,
                 low_cpu_mem_usage = True,
                 device_map = device_map,
                 quantization_config = quantization_config,
@@ -421,6 +432,7 @@ def train():
         else:
             base_model = AutoModelForCausalLM.from_pretrained(
                 args.model_name_or_path,
+                cache_dir = args.cache_dir,
                 low_cpu_mem_usage = True,
                 device_map = device_map,
                 max_memory = max_memory,
@@ -432,6 +444,17 @@ def train():
 
         print("Merging Base model + Adapter")
         model_to_push = PeftModel.from_pretrained(base_model, new_model)
+
+        param_size = 0
+        for param in model_to_push.parameters():
+            param_size += param.nelement() * param.element_size()
+        buffer_size = 0
+        for buffer in model_to_push.buffers():
+            buffer_size += buffer.nelement() * buffer.element_size()
+
+        size_all_mb = (param_size + buffer_size) / 1024**2
+        print('model size: {:.3f}MB'.format(size_all_mb))
+
         model_to_push = model_to_push.merge_and_unload()
         
         model_to_push.push_to_hub(f"Sharan1712/{new_model}")

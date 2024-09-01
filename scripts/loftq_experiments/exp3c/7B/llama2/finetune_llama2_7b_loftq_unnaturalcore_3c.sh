@@ -8,10 +8,11 @@ python main.py \
     --logging_steps 25 \
     --save_strategy steps \
     --data_seed 2024 \
-    --save_steps 500 \
+    --save_steps 1500 \
     --save_total_limit 40 \
     --evaluation_strategy steps \
     --eval_dataset_size 0.2 \
+    --max_eval_samples 1000 \
     --per_device_eval_batch_size 6 \
     --dataloader_num_workers 1 \
     --group_by_length \

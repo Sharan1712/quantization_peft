@@ -1,6 +1,5 @@
 python main.py \
     --model_name_or_path meta-llama/Llama-2-7b-hf \
-    --hf_token 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 \
     --use_auth \
     --output_dir ./output/qlora_exp/exp1a/7B/llama2-7b-unnatural-core-qlora-4bit \
     --report_to wandb \
@@ -19,7 +18,6 @@ python main.py \
     --remove_unused_columns False \
     --do_train \
     --do_eval \
-    --do_predict \
     --do_mmlu_eval \
     --lora_r 64 \
     --lora_alpha 16 \
@@ -35,7 +33,7 @@ python main.py \
     --dataset_format unnatural-core \
     --source_max_len 384 \
     --target_max_len 128 \
-    --per_device_train_batch_size 4 \
+    --per_device_train_batch_size 8 \
     --gradient_accumulation_steps 16 \
     --max_steps 5000 \
     --eval_steps 500 \

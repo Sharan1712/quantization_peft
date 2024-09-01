@@ -1,6 +1,6 @@
 python main.py \
     --model_name_or_path meta-llama/Llama-2-7b-hf \
-    --hf_token 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 \
+    --cache_dir ./cache \
     --use_auth \
     --output_dir ./output/qlora_exp/exp1a/7B/llama2-7b-oasst-qlora-4bit \
     --report_to wandb \
@@ -43,3 +43,4 @@ python main.py \
     --lora_dropout 0.1 \
     --weight_decay 0.001 \
     --seed 2024 \
+    --n_gpus 1 \

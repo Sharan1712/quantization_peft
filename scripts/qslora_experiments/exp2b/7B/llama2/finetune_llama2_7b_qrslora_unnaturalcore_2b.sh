@@ -19,7 +19,6 @@ python main.py \
     --remove_unused_columns False \
     --do_train \
     --do_eval \
-    --do_predict \
     --do_mmlu_eval \
     --lora_r 8 \
     --lora_alpha 16 \

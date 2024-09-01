@@ -2,6 +2,7 @@ wandb/
 output/
 cache/
 llama2_*
+llama3_*
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
