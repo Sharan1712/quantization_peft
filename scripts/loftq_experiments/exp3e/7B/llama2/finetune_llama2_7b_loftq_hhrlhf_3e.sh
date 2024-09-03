@@ -1,6 +1,5 @@
 python main.py \
     --model_name_or_path meta-llama/Llama-2-7b-hf \
-    --hf_token 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 \
     --use_auth \
     --output_dir ./output/loftq_exp/exp3e/7B/llama2-7b-hhrlhf-loftq-4bit \
     --report_to wandb \
