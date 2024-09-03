@@ -1,6 +1,5 @@
 python main.py \
     --model_name_or_path meta-llama/Meta-Llama-3-8B \
-    --hf_token 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 \
     --use_auth \
     --output_dir ./output/qrslora_exp/exp2a/8B/llama3-8b-hhrlhf-qrslora-4bit \
     --report_to wandb \
